@@ -54,20 +54,20 @@
             return { planet, pivot, orbitSpeed, trail, trailPoints };
         }
 
-        // Add planets to the scene with proper distances and sizes (scaled down for visualization)
+        // Adjusted planets with smaller sizes and distances for better visibility
         const planets = [
-            createPlanet(0.4, 'https://upload.wikimedia.org/wikipedia/commons/2/29/Mercury.jpg', 6, 0.04),  // Mercury (58 days)
-            createPlanet(0.9, 'https://upload.wikimedia.org/wikipedia/commons/8/89/Venus_%28planet%29.jpg', 8, 0.015), // Venus (225 days)
-            createPlanet(1, 'https://upload.wikimedia.org/wikipedia/commons/8/83/Earth_political_map.png', 10, 0.01),   // Earth (365 days)
-            createPlanet(0.8, 'https://upload.wikimedia.org/wikipedia/commons/0/02/Mars.svg', 12, 0.008), // Mars (687 days)
-            createPlanet(2, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg', 16, 0.002),  // Jupiter (11.86 years)
-            createPlanet(1.5, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Saturn.jpg', 20, 0.001), // Saturn (29.46 years)
-            createPlanet(1.2, 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Uranus.png', 24, 0.0005), // Uranus (84 years)
-            createPlanet(1.1, 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Neptune.png', 28, 0.0003) // Neptune (164.8 years)
+            createPlanet(0.2, 'https://upload.wikimedia.org/wikipedia/commons/2/29/Mercury.jpg', 7, 0.04),  // Mercury
+            createPlanet(0.5, 'https://upload.wikimedia.org/wikipedia/commons/8/89/Venus_%28planet%29.jpg', 9, 0.02), // Venus
+            createPlanet(0.6, 'https://upload.wikimedia.org/wikipedia/commons/8/83/Earth_political_map.png', 11, 0.015),   // Earth
+            createPlanet(0.4, 'https://upload.wikimedia.org/wikipedia/commons/0/02/Mars.svg', 13, 0.012), // Mars
+            createPlanet(1, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg', 17, 0.005),  // Jupiter
+            createPlanet(0.8, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Saturn.jpg', 22, 0.003), // Saturn
+            createPlanet(0.6, 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Uranus.png', 26, 0.001), // Uranus
+            createPlanet(0.5, 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Neptune.png', 30, 0.0007) // Neptune
         ];
 
         // Set camera position
-        camera.position.set(0, 50, 100); // Higher to see all planets
+        camera.position.set(0, 10, 50); // Adjusted to better see all planets
 
         // Orbit controls (to allow user to rotate the scene)
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
