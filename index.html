@@ -7,14 +7,15 @@
     <style>
         body { margin: 0; }
         canvas { display: block; }
+        #controls { position: fixed; top: 10px; left: 10px; z-index: 10; }
     </style>
 </head>
 <body>
     <div id="controls">
-        <label for="speed">Orbit Speed Multiplier: </label>
-        <input type="range" id="speed" min="0" max="2" step="0.01" value="1">
-        <span id="speedValue">1</span>
+        <label for="speedControl">Orbit Speed:</label>
+        <input type="range" id="speedControl" min="0.1" max="10" value="1" step="0.1">
     </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
     <script>
@@ -108,12 +109,17 @@
         controls.dampingFactor = 0.25;
         controls.enableZoom = true;
 
+        // Speed control
+        const speedControl = document.getElementById('speedControl');
+
         // Animate function to rotate planets and update labels
         function animate() {
             requestAnimationFrame(animate);
 
+            const speedMultiplier = parseFloat(speedControl.value);
+
             planets.forEach(planetData => {
-                planetData.pivot.rotation.y += planetData.orbitSpeed;
+                planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
 
                 // Update label position to follow the planet
                 const planetPosition = new THREE.Vector3();
