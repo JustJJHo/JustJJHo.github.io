@@ -78,7 +78,7 @@
 
             // Add label for the planet
             const label = createTextLabel(name);
-            label.position.set(distance, 0, size + 1); // Position label slightly above the planet
+            label.position.set(distance, size + 1, 0); // Position label slightly above the planet
             scene.add(label);
 
             // Orbit trail setup
@@ -104,14 +104,15 @@
             createPlanet(0.5, '2k_neptune.jpg', 28, 0.0007, 'Neptune')
         ];
 
-        // Set camera position
-        camera.position.set(0, 15, 50);
+        // Set camera position to follow the Sun
+        camera.position.set(0, 10, 50);
 
         // Orbit controls (to allow user to rotate the scene)
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.25;
         controls.enableZoom = true;
+        controls.target.set(0, 0, 0); // Set the camera target to the Sun
 
         // Speed control
         const speedControl = document.getElementById('speedControl');
@@ -134,9 +135,6 @@
                 // Rotate the planet's pivot to create orbiting
                 planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
 
-                // Tilt the planet's pivot to create upward movement (using X or Z axis)
-                planetData.pivot.rotation.x = upwardMovement * 0.02; // Apply a slight tilt based on upward movement
-
                 // Update label position to follow the planet
                 const planetPosition = new THREE.Vector3();
                 planetData.planet.getWorldPosition(planetPosition);
@@ -149,6 +147,9 @@
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
             });
 
+            // Move the camera with the Sun
+            camera.position.y = upwardMovement + 10; // Keep the camera above the Sun
+            controls.target.copy(sun.position); // Keep the camera looking at the Sun
             controls.update();
             renderer.render(scene, camera);
         }
