@@ -63,15 +63,15 @@
             createPlanet(0.4, 'https://upload.wikimedia.org/wikipedia/commons/2/29/Mercury.jpg', 6, 0.04),  // Mercury
             createPlanet(0.9, 'https://upload.wikimedia.org/wikipedia/commons/8/89/Venus_%28planet%29.jpg', 8, 0.015), // Venus
             createPlanet(1, 'https://upload.wikimedia.org/wikipedia/commons/8/83/Earth_political_map.png', 10, 0.01),   // Earth
-            createPlanet(0.8, 'https://upload.wikimedia.org/wikipedia/commons/0/02/Mars.svg', 12, 0.008),// Mars
+            createPlanet(0.8, 'https://upload.wikimedia.org/wikipedia/commons/0/02/Mars.svg', 12, 0.008), // Mars
             createPlanet(2, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg', 16, 0.002),  // Jupiter
-            createPlanet(1.5, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Saturn.jpg', 20, 0.001),// Saturn
-            createPlanet(1.2, 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Uranus.png', 24, 0.0005),// Uranus
-            createPlanet(1.1, 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Neptune.png', 28, 0.0003)// Neptune
+            createPlanet(1.5, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Saturn.jpg', 20, 0.001), // Saturn
+            createPlanet(1.2, 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Uranus.png', 24, 0.0005), // Uranus
+            createPlanet(1.1, 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Neptune.png', 28, 0.0003) // Neptune
         ];
 
         // Set camera position
-        camera.position.z = 50;
+        camera.position.set(0, 50, 100); // Higher to see all planets
 
         // Orbit controls (to allow user to rotate the scene)
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -96,14 +96,11 @@
 
                 // Update trail geometry
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
-
-                // Move the Sun through space (very slow drift)
-                sun.position.x += 0.001;
-                sun.position.z += 0.001;
-
-                // Move all planets and their trails with the Sun
-                planetData.pivot.position.copy(sun.position);  // Keep pivot and planets centered on the Sun
             });
+
+            // Move the Sun through space (very slow drift)
+            sun.position.x += 0.001;
+            sun.position.z += 0.001;
 
             // Render the scene
             controls.update();
@@ -111,6 +108,13 @@
         }
 
         animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>
