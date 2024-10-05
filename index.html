@@ -6,7 +6,7 @@
     <title>3D Orrery - Solar System with Textured Sun</title>
     <style>
         body { margin: 0; background-image: url('2k_stars.jpg'); }
-        canvas { display: block; background-image: url('2k_stars.jpg'); }
+        canvas { display: block; }
         #controls { position: fixed; top: 10px; left: 10px; z-index: 10; }
     </style>
 </head>
@@ -105,8 +105,8 @@
             createPlanet(0.5, '2k_neptune.jpg', 28, 0.0007, 'Neptune')
         ];
 
-        // Set camera position
-        camera.position.set(0, 15, 50);
+        // Set camera position to look at the sun
+        camera.position.set(0, 15, 50); // Adjust the height and distance from the sun
 
         // Orbit controls (to allow user to rotate the scene)
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -144,10 +144,7 @@
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
             });
 
-            // Lock camera onto the sun
-            camera.position.set(sun.position.x, sun.position.y + 15, sun.position.z + 50); // Adjust camera position based on the sun's position
-            camera.lookAt(sun.position); // Always look at the sun
-
+            // Keep the sun centered
             controls.update();
             renderer.render(scene, camera);
         }
