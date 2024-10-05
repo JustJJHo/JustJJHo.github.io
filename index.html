@@ -134,8 +134,8 @@
 
             const speedMultiplier = parseFloat(speedControl.value);
 
-            // Move the sun upwards
-            sun.position.y += 0.01; // Change the speed of the upward movement here
+            // Move the sun upwards and make speed adjustable
+            sun.position.y += 0.01 * speedMultiplier; // Change the speed of the upward movement here
 
             planets.forEach(planetData => {
                 // Move the pivot upwards
@@ -156,15 +156,18 @@
                     // Update trail geometry
                     planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
 
-                    // Remove oldest point from trail if it exceeds 10 seconds of trail length
+                    // Fade the oldest point over time
                     if (planetData.trailPoints.length > 60 * 10) { // 60 FPS * 10 seconds
-                        planetData.trailPoints.shift(); // Remove the oldest point
+                        const fadeIndex = planetData.trailPoints.length - (60 * 10);
+                        const fadeFactor = Math.max(0, 1 - ((planetData.timeElapsed - 10) / 10)); // Calculate fade factor
+                        const fadedColor = new THREE.Color(fadeFactor, fadeFactor, fadeFactor); // Fade to black
+                        planetData.trail.material.color.set(fadedColor);
+                        planetData.trailPoints[fadeIndex] = [planetPosition.x, planetPosition.y, planetPosition.z]; // Update the position with faded color
                     }
 
-                    // Hide trail after 10 seconds
-                    if (planetData.timeElapsed > 10) {
-                        planetData.isTrailVisible = false;
-                        planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3)); // Clear trail
+                    // Remove oldest point from trail if it exceeds 10 seconds of trail length
+                    if (planetData.trailPoints.length > 60 * 10) {
+                        planetData.trailPoints.shift(); // Remove the oldest point
                     }
                 } else {
                     // Reset trail after it disappears
