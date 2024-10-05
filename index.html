@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Orrery - Solar System with Textured Sun</title>
+    <title>Solar System Orrery</title>
     <style>
         body { margin: 0; background-image: url('2k_stars.jpg'); }
-        canvas { display: block; background-image: url('2k_stars.jpg'); }
+        canvas { display: block; }
         #controls { position: fixed; top: 10px; left: 10px; z-index: 10; }
     </style>
 </head>
@@ -26,10 +26,6 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Load background texture for the stars
-        const backgroundTexture = new THREE.TextureLoader().load('2k_stars.jpg');
-        scene.background = backgroundTexture;
-
         // Load texture for the Sun
         const sunTextureUrl = '2k_sun.jpg';
         const sunTexture = new THREE.TextureLoader().load(sunTextureUrl);
@@ -46,9 +42,6 @@
         const sun = new THREE.Mesh(sunGeometry, sunMaterial);
         scene.add(sun);
 
-        // Load textures for the planets
-        const loadTexture = (url) => new THREE.TextureLoader().load(url);
-
         // Function to create text label sprites
         function createTextLabel(text) {
             const canvas = document.createElement('canvas');
@@ -64,16 +57,20 @@
             return sprite;
         }
 
-        // Create a planet function with trails and labels
-        function createPlanet(size, textureUrl, distance, orbitSpeed, name) {
+        // Load textures for planets
+        const loadTexture = (url) => new THREE.TextureLoader().load(url);
+
+        // Create a planet with orbit
+        function createPlanet(size, textureUrl, distance, orbitSpeed, name, tilt = 0) {
             const planetGeometry = new THREE.SphereGeometry(size, 32, 32);
             const planetMaterial = new THREE.MeshStandardMaterial({ map: loadTexture(textureUrl) });
             const planet = new THREE.Mesh(planetGeometry, planetMaterial);
 
-            // Create a pivot for orbiting
+            // Add planet to the scene at the correct distance from the Sun
             const pivot = new THREE.Object3D();
             planet.position.set(distance, 0, 0);
             pivot.add(planet);
+            pivot.rotation.x = THREE.Math.degToRad(tilt);  // Tilt the orbit for realism
             scene.add(pivot);
 
             // Add label for the planet
@@ -81,27 +78,19 @@
             label.position.set(distance, 0, size + 1); // Position label slightly above the planet
             scene.add(label);
 
-            // Orbit trail setup
-            const trailPoints = [];
-            const trailMaterial = new THREE.LineBasicMaterial({ color: planetMaterial.color });
-            const trailGeometry = new THREE.BufferGeometry();
-            trailGeometry.setAttribute('position', new THREE.Float32BufferAttribute(trailPoints.flat(), 3));
-            const trail = new THREE.Line(trailGeometry, trailMaterial);
-            scene.add(trail);
-
-            return { planet, pivot, orbitSpeed, trail, trailPoints, label };
+            return { planet, pivot, orbitSpeed, label };
         }
 
-        // Create planets and their labels
+        // Planets
         const planets = [
-            createPlanet(0.2, '2k_mercury.jpg', 6, 0.04, 'Mercury'),
-            createPlanet(0.4, '2k_venus_surface.jpg', 8, 0.02, 'Venus'),
-            createPlanet(0.5, '2k_earth_daymap.jpg', 10, 0.015, 'Earth'),
-            createPlanet(0.4, '2k_mars.jpg', 12, 0.012, 'Mars'),
-            createPlanet(0.8, '2k_jupiter.jpg', 16, 0.005, 'Jupiter'),
-            createPlanet(0.7, '2k_saturn.jpg', 20, 0.003, 'Saturn'),
-            createPlanet(0.6, '2k_uranus.jpg', 24, 0.001, 'Uranus'),
-            createPlanet(0.5, '2k_neptune.jpg', 28, 0.0007, 'Neptune')
+            createPlanet(0.2, '2k_mercury.jpg', 6, 0.04, 'Mercury', 7),
+            createPlanet(0.4, '2k_venus_surface.jpg', 8, 0.02, 'Venus', 3.39),
+            createPlanet(0.5, '2k_earth_daymap.jpg', 10, 0.015, 'Earth', 0),  // Earth's tilt is approximately 23.5 degrees
+            createPlanet(0.4, '2k_mars.jpg', 12, 0.012, 'Mars', 1.85),
+            createPlanet(0.8, '2k_jupiter.jpg', 16, 0.005, 'Jupiter', 1.3),
+            createPlanet(0.7, '2k_saturn.jpg', 20, 0.003, 'Saturn', 2.49),
+            createPlanet(0.6, '2k_uranus.jpg', 24, 0.001, 'Uranus', 0.77),
+            createPlanet(0.5, '2k_neptune.jpg', 28, 0.0007, 'Neptune', 1.77)
         ];
 
         // Set camera position
@@ -116,11 +105,19 @@
         // Speed control
         const speedControl = document.getElementById('speedControl');
 
-        // Animate function to rotate planets and update labels
+        // Variables for sun movement
+        let sunY = 0;
+        const sunMoveSpeed = 0.01;  // Speed at which the sun moves upward
+
+        // Animate function to rotate planets, move Sun, and update labels
         function animate() {
             requestAnimationFrame(animate);
 
             const speedMultiplier = parseFloat(speedControl.value);
+
+            // Move the sun upwards over time
+            sunY += sunMoveSpeed * speedMultiplier;
+            sun.position.set(0, sunY, 0);
 
             planets.forEach(planetData => {
                 planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
@@ -129,12 +126,6 @@
                 const planetPosition = new THREE.Vector3();
                 planetData.planet.getWorldPosition(planetPosition);
                 planetData.label.position.set(planetPosition.x, planetPosition.y + planetData.planet.geometry.parameters.radius + 1, planetPosition.z);
-
-                // Add current position to trail points
-                planetData.trailPoints.push([planetPosition.x, planetPosition.y, planetPosition.z]);
-
-                // Update trail geometry
-                planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
             });
 
             controls.update();
