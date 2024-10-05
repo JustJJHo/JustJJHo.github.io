@@ -38,8 +38,8 @@
 
         // Sun with texture
         const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
-        const sunMaterial = new THREE.MeshPhongMaterial({ map: sunTexture, emissive: 0xffff00 });
-        const sun = new THREE.Mesh(sunGeometry, sunTexture);
+        const sunMaterial = new THREE.MeshStandardMaterial({ map: sunTexture });
+        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
         scene.add(sun);
 
         // Load textures for the planets
