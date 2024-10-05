@@ -84,7 +84,7 @@
 
             // Orbit trail setup
             const trailPoints = [];
-            const trailMaterial = new THREE.LineBasicMaterial({ color: planetMaterial.color });
+            const trailMaterial = new THREE.LineBasicMaterial({ color: planetMaterial.color, opacity: 0.5, transparent: true });
             const trailGeometry = new THREE.BufferGeometry();
             trailGeometry.setAttribute('position', new THREE.Float32BufferAttribute(trailPoints.flat(), 3));
             const trail = new THREE.Line(trailGeometry, trailMaterial);
@@ -97,8 +97,7 @@
                 trail,
                 trailPoints,
                 label,
-                timeElapsed: 0,
-                isTrailVisible: true
+                trailLength: 100, // Set a fixed length for the trail
             };
         }
 
@@ -148,32 +147,28 @@
                 planetData.planet.getWorldPosition(planetPosition);
                 planetData.label.position.set(planetPosition.x, planetPosition.y + planetData.planet.geometry.parameters.radius + 1, planetPosition.z);
 
-                // Update trail points and manage visibility
-                if (planetData.isTrailVisible) {
-                    planetData.timeElapsed += 1 / 60; // Increment time (60 FPS)
-                    planetData.trailPoints.push([planetPosition.x, planetPosition.y, planetPosition.z]);
+                // Update trail points
+                planetData.trailPoints.push([planetPosition.x, planetPosition.y, planetPosition.z]);
 
-                    // Update trail geometry
-                    planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
+                // Limit the number of points in the trail to create a constant length
+                if (planetData.trailPoints.length > planetData.trailLength) {
+                    planetData.trailPoints.shift(); // Remove the oldest point
+                }
 
-                    // Fade the oldest point over time
-                    if (planetData.trailPoints.length > 60 * 10) { // 60 FPS * 10 seconds
-                        const fadeIndex = planetData.trailPoints.length - (60 * 10);
-                        const fadeFactor = Math.max(0, 1 - ((planetData.timeElapsed - 10) / 10)); // Calculate fade factor
-                        const fadedColor = new THREE.Color(fadeFactor, fadeFactor, fadeFactor); // Fade to black
-                        planetData.trail.material.color.set(fadedColor);
-                        planetData.trailPoints[fadeIndex] = [planetPosition.x, planetPosition.y, planetPosition.z]; // Update the position with faded color
-                    }
+                // Update trail geometry
+                planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
+                planetData.trail.geometry.attributes.position.needsUpdate = true; // Flag to update position
 
-                    // Remove oldest point from trail if it exceeds 10 seconds of trail length
-                    if (planetData.trailPoints.length > 60 * 10) {
-                        planetData.trailPoints.shift(); // Remove the oldest point
-                    }
-                } else {
-                    // Reset trail after it disappears
-                    planetData.trailPoints.length = 0; // Clear points
-                    planetData.isTrailVisible = true; // Re-enable trail visibility
-                    planetData.timeElapsed = 0; // Reset time elapsed
+                // Apply fading effect to the trail
+                const fadeLength = Math.min(20, planetData.trailPoints.length); // Length of the fading effect
+                const positions = planetData.trail.geometry.attributes.position.array;
+
+                for (let i = 0; i < fadeLength; i++) {
+                    const opacity = 1 - (i / fadeLength); // Calculate fade based on position
+                    const index = i * 3;
+                    const color = new THREE.Color(planetData.trail.material.color);
+                    color.multiplyScalar(opacity); // Fade color
+                    planetData.trail.material.color.set(color);
                 }
             });
 
