@@ -15,6 +15,8 @@
     <div id="controls">
         <label for="speedControl">Orbit Speed:</label>
         <input type="range" id="speedControl" min="0.1" max="10" value="1" step="0.1">
+        <label for="sunSpeedControl">Sun Speed:</label>
+        <input type="range" id="sunSpeedControl" min="0.1" max="10" value="1" step="0.1">
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -54,14 +56,14 @@
         function createTextLabel(text) {
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
-            context.font = '48px Arial'; // Increased font size
+            context.font = '72px Arial'; // Increased font size for visibility
             context.fillStyle = 'white';
-            context.fillText(text, 0, 48);
+            context.fillText(text, 0, 72); // Position text at a larger scale
 
             const texture = new THREE.CanvasTexture(canvas);
             const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
             const sprite = new THREE.Sprite(spriteMaterial);
-            sprite.scale.set(4, 2, 1); // Adjusted sprite size for visibility
+            sprite.scale.set(6, 3, 1); // Adjusted sprite size for better visibility
             return sprite;
         }
 
@@ -79,7 +81,7 @@
 
             // Add label for the planet
             const label = createTextLabel(name);
-            label.position.set(distance, 0, size + 1); // Position label slightly above the planet
+            label.position.set(distance, size + 2, 0); // Position label above the planet
             scene.add(label);
 
             // Orbit trail setup
@@ -122,23 +124,25 @@
         controls.enableDamping = true;
         controls.dampingFactor = 0.25;
         controls.enableZoom = true;
-        controls.enableRotate = true; // Allow rotation
+        controls.enableRotate = true; // Allow rotation on all axes
         controls.screenSpacePanning = false; // Prevent panning in the screen space
 
         // Speed control
         const speedControl = document.getElementById('speedControl');
+        const sunSpeedControl = document.getElementById('sunSpeedControl');
 
         // Animate function to rotate planets and update labels
         function animate() {
             requestAnimationFrame(animate);
 
             const speedMultiplier = parseFloat(speedControl.value);
+            const sunSpeedMultiplier = parseFloat(sunSpeedControl.value);
 
-            // Move the sun upwards
-            sun.position.y += 0.01; // Change the speed of the upward movement here
+            // Move the sun upwards based on user input
+            sun.position.y += 0.01 * sunSpeedMultiplier; // Change the speed of the upward movement here
 
             planets.forEach(planetData => {
-                // Move the pivot upwards
+                // Move the pivot upwards to follow the Sun
                 planetData.pivot.position.y = sun.position.y; // Keep the pivot moving upwards
 
                 planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
@@ -146,7 +150,7 @@
                 // Update label position to follow the planet
                 const planetPosition = new THREE.Vector3();
                 planetData.planet.getWorldPosition(planetPosition);
-                planetData.label.position.set(planetPosition.x, planetPosition.y + planetData.planet.geometry.parameters.radius + 1, planetPosition.z);
+                planetData.label.position.set(planetPosition.x, planetPosition.y + planetData.planet.geometry.parameters.radius + 3, planetPosition.z); // Adjust label position
 
                 // Update trail points and manage visibility
                 if (planetData.isTrailVisible) {
@@ -161,10 +165,10 @@
                         planetData.trailPoints.shift(); // Remove the oldest point
                     }
 
-                    // Hide trail after 10 seconds
+                    // Fade out trail over time
                     if (planetData.timeElapsed > 10) {
-                        planetData.isTrailVisible = false;
-                        planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3)); // Clear trail
+                        const alpha = Math.max(0, 1 - (planetData.timeElapsed - 10) / 5); // Fade over 5 seconds
+                        planetData.trailMaterial.color.set(new THREE.Color(1, 1, 1).multiplyScalar(alpha)); // Adjust color based on alpha
                     }
                 } else {
                     // Reset trail after it disappears
