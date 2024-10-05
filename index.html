@@ -124,8 +124,9 @@
         controls.enableRotate = true; // Allow rotation
         controls.screenSpacePanning = false; // Prevent panning in the screen space
 
-        // Speed control
-        const speedControl = document.getElementById('speedControl');
+        // Lock the target of controls to the Sun
+        controls.target.set(0, 0, 0); // Position of the Sun
+        controls.update(); // Update the controls to apply the new target
 
         // Animate function to rotate planets and update labels
         function animate() {
