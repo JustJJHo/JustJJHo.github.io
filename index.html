@@ -105,8 +105,8 @@
             createPlanet(0.5, '2k_neptune.jpg', 28, 0.0007, 'Neptune')
         ];
 
-        // Set camera position to look at the sun
-        camera.position.set(0, 15, 50); // Adjust the height and distance from the sun
+        // Set initial camera position
+        camera.position.set(0, 15, 50); // Adjust height and distance from the sun
 
         // Orbit controls (to allow user to rotate the scene)
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -126,8 +126,9 @@
             // Move the sun upwards
             sun.position.y += 0.01; // Change the speed of the upward movement here
 
-            // Always keep the camera looking at the sun
-            camera.lookAt(sun.position);
+            // Update camera position to follow the sun
+            camera.position.y = sun.position.y + 15; // Keep camera above sun
+            camera.lookAt(sun.position); // Keep the camera looking at the sun
 
             planets.forEach(planetData => {
                 // Move the pivot upwards
