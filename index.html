@@ -137,6 +137,11 @@
             // Move the sun upwards and make speed adjustable
             sun.position.y += 0.01 * speedMultiplier; // Change the speed of the upward movement here
 
+            // Update camera position to follow the Sun
+            camera.position.y = sun.position.y + 15; // Keep the camera above the Sun
+            camera.position.z = 50; // Maintain a fixed distance from the Sun
+            camera.lookAt(sun.position); // Make the camera look at the Sun
+
             planets.forEach(planetData => {
                 // Move the pivot upwards
                 planetData.pivot.position.y = sun.position.y; // Keep the pivot moving upwards
