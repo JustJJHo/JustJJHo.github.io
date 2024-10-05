@@ -90,7 +90,16 @@
             const trail = new THREE.Line(trailGeometry, trailMaterial);
             scene.add(trail);
 
-            return { planet, pivot, orbitSpeed, trail, trailPoints, label, distanceTraveled: 0 };
+            return {
+                planet,
+                pivot,
+                orbitSpeed,
+                trail,
+                trailPoints,
+                label,
+                timeElapsed: 0,
+                isTrailVisible: true
+            };
         }
 
         // Create planets and their labels
@@ -139,23 +148,29 @@
                 planetData.planet.getWorldPosition(planetPosition);
                 planetData.label.position.set(planetPosition.x, planetPosition.y + planetData.planet.geometry.parameters.radius + 1, planetPosition.z);
 
-                // Calculate the distance traveled
-                planetData.distanceTraveled += planetData.orbitSpeed * speedMultiplier;
-                if (planetData.distanceTraveled > 100) {
-                    planetData.distanceTraveled = 0; // Reset distance traveled
-                    planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3)); // Clear trail
-                    planetData.trailPoints.length = 0; // Clear points
-                } else {
-                    // Add current position to trail points
+                // Update trail points and manage visibility
+                if (planetData.isTrailVisible) {
+                    planetData.timeElapsed += 1 / 60; // Increment time (60 FPS)
                     planetData.trailPoints.push([planetPosition.x, planetPosition.y, planetPosition.z]);
 
                     // Update trail geometry
                     planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
-                }
 
-                // Remove oldest point from trail if it exceeds 3 seconds of trail length
-                if (planetData.trailPoints.length > 180) { // 60 fps * 3 seconds
-                    planetData.trailPoints.shift(); // Remove the oldest point
+                    // Remove oldest point from trail if it exceeds 10 seconds of trail length
+                    if (planetData.trailPoints.length > 60 * 10) { // 60 FPS * 10 seconds
+                        planetData.trailPoints.shift(); // Remove the oldest point
+                    }
+
+                    // Hide trail after 10 seconds
+                    if (planetData.timeElapsed > 10) {
+                        planetData.isTrailVisible = false;
+                        planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3)); // Clear trail
+                    }
+                } else {
+                    // Reset trail after it disappears
+                    planetData.trailPoints.length = 0; // Clear points
+                    planetData.isTrailVisible = true; // Re-enable trail visibility
+                    planetData.timeElapsed = 0; // Reset time elapsed
                 }
             });
 
