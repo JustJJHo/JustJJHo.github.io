@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -11,7 +11,6 @@
     </style>
 </head>
 <body>
-
 
     <div id="controls">
         <label for="speedControl">Orbit Speed:</label>
@@ -124,7 +123,13 @@
 
             const speedMultiplier = parseFloat(speedControl.value);
 
+            // Move the sun upwards
+            sun.position.y += 0.01; // Change the speed of the upward movement here
+
             planets.forEach(planetData => {
+                // Move the pivot upwards
+                planetData.pivot.position.y = sun.position.y; // Keep the pivot moving upwards
+
                 planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
 
                 // Update label position to follow the planet
@@ -138,6 +143,10 @@
                 // Update trail geometry
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
             });
+
+            // Lock camera onto the sun
+            camera.position.set(sun.position.x, sun.position.y + 15, sun.position.z + 50); // Adjust camera position based on the sun's position
+            camera.lookAt(sun.position); // Always look at the sun
 
             controls.update();
             renderer.render(scene, camera);
