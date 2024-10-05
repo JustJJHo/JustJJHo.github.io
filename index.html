@@ -115,13 +115,6 @@
         controls.enableZoom = false; // Disable zooming
         controls.enablePan = false; // Disable panning
 
-        // Lock camera rotation around the sun
-        controls.mouseButtons = {
-            LEFT: THREE.MOUSE.ROTATE,
-            MIDDLE: null, // Disable middle mouse button interaction
-            RIGHT: null // Disable right-click
-        };
-
         // Speed control
         const speedControl = document.getElementById('speedControl');
 
@@ -135,6 +128,7 @@
             sun.position.y += 0.01 * speedMultiplier; // Change the speed of the upward movement here
 
             // Keep the camera locked on the sun's position
+            camera.position.set(0, sun.position.y + 15, 50); // Adjust the camera's position
             camera.lookAt(sun.position); // Always look at the sun
 
             planets.forEach(planetData => {
@@ -153,15 +147,19 @@
 
                 // Update trail geometry
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
-            });
 
-            // Check if trails should disappear
-            planets.forEach(planetData => {
+                // Gradually fade out the trail
                 if (planetData.trailPoints.length > 0) {
-                    setTimeout(() => {
-                        planetData.trailPoints.length = 0; // Clear trail points
-                        planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3)); // Clear geometry
-                    }, 10000); // Trails disappear after 10 seconds
+                    // Remove the first point after 10 seconds
+                    if (planetData.trailPoints.length > 1) {
+                        setTimeout(() => {
+                            planetData.trailPoints.shift(); // Remove the first point
+                            planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3)); // Update geometry
+                        }, 10000); // Wait for 10 seconds
+                    }
+
+                    // Gradually fade out the rest of the trail
+                    planetData.trail.material.opacity = Math.max(0, planetData.trail.material.opacity - 0.01); // Decrease opacity
                 }
             });
 
