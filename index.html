@@ -32,7 +32,6 @@
         // Create a planet function with trails
         function createPlanet(size, textureUrl, distance, orbitSpeed) {
             const planetGeometry = new THREE.SphereGeometry(size, 32, 32);
-            // Use MeshBasicMaterial for all planets to remove lighting effects
             const planetMaterial = new THREE.MeshBasicMaterial({ map: loadTexture(textureUrl) });
             const planet = new THREE.Mesh(planetGeometry, planetMaterial);
 
@@ -54,16 +53,16 @@
             return { planet, pivot, orbitSpeed, trail, trailPoints };
         }
 
-        // Adjusted planets with smaller sizes and distances for better visibility
+        // Updated planets with new textures
         const planets = [
-            createPlanet(0.2, 'https://upload.wikimedia.org/wikipedia/commons/2/29/Mercury.jpg', 7, 0.04),  // Mercury
-            createPlanet(0.5, 'https://upload.wikimedia.org/wikipedia/commons/8/89/Venus_%28planet%29.jpg', 9, 0.02), // Venus
-            createPlanet(0.6, 'https://upload.wikimedia.org/wikipedia/commons/8/83/Earth_political_map.png', 11, 0.015),   // Earth
-            createPlanet(0.4, 'https://upload.wikimedia.org/wikipedia/commons/0/02/Mars.svg', 13, 0.012), // Mars
+            createPlanet(0.2, 'https://upload.wikimedia.org/wikipedia/commons/5/5d/Mercury_in_color.jpg', 7, 0.04),  // Mercury
+            createPlanet(0.5, 'https://upload.wikimedia.org/wikipedia/commons/0/06/Venus.jpg', 9, 0.02), // Venus
+            createPlanet(0.6, 'https://upload.wikimedia.org/wikipedia/commons/4/4f/Earth-2.jpg', 11, 0.015),   // Earth
+            createPlanet(0.4, 'https://upload.wikimedia.org/wikipedia/commons/0/02/Mars.jpg', 13, 0.012), // Mars
             createPlanet(1, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg', 17, 0.005),  // Jupiter
-            createPlanet(0.8, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Saturn.jpg', 22, 0.003), // Saturn
-            createPlanet(0.6, 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Uranus.png', 26, 0.001), // Uranus
-            createPlanet(0.5, 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Neptune.png', 30, 0.0007) // Neptune
+            createPlanet(0.8, 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Saturn-09.jpg', 22, 0.003), // Saturn
+            createPlanet(0.6, 'https://upload.wikimedia.org/wikipedia/commons/3/3f/Uranus.jpg', 26, 0.001), // Uranus
+            createPlanet(0.5, 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Neptune.jpg', 30, 0.0007) // Neptune
         ];
 
         // Set camera position
