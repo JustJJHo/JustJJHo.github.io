@@ -108,12 +108,11 @@
         // Set initial camera position
         camera.position.set(0, 15, 50); // Adjust height and distance from the sun
 
-        // Initialize OrbitControls
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.25;
-        controls.enableZoom = true; // Enable zooming
-        controls.enablePan = true; // Enable panning
+        // Remove OrbitControls to disable mouse interaction
+        // const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        // controls.enableDamping = true;
+        // controls.dampingFactor = 0.25;
+        // controls.enableZoom = true;
 
         // Speed control
         const speedControl = document.getElementById('speedControl');
@@ -127,9 +126,9 @@
             // Move the sun upwards based on the speed control
             sun.position.y += 0.01 * speedMultiplier; // Change the speed of the upward movement here
 
-            // Keep the camera locked on the sun's position
-            camera.position.set(0, sun.position.y + 15, 50); // Adjust the camera's position
-            camera.lookAt(sun.position); // Always look at the sun
+            // Update camera position to follow the sun
+            camera.position.set(sun.position.x, sun.position.y + 15, sun.position.z + 50); // Keep camera above sun and at a fixed distance
+            camera.lookAt(sun.position); // Keep the camera looking at the sun
 
             planets.forEach(planetData => {
                 // Move the pivot upwards
@@ -147,23 +146,9 @@
 
                 // Update trail geometry
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
-
-                // Gradually fade out the trail
-                if (planetData.trailPoints.length > 0) {
-                    // Remove the first point after 10 seconds
-                    if (planetData.trailPoints.length > 1) {
-                        setTimeout(() => {
-                            planetData.trailPoints.shift(); // Remove the first point
-                            planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3)); // Update geometry
-                        }, 10000); // Wait for 10 seconds
-                    }
-
-                    // Gradually fade out the rest of the trail
-                    planetData.trail.material.opacity = Math.max(0, planetData.trail.material.opacity - 0.01); // Decrease opacity
-                }
             });
 
-            controls.update(); // Allow controls to update the camera position based on user interaction
+            // controls.update(); // Remove this line since controls are disabled
             renderer.render(scene, camera);
         }
 
