@@ -37,7 +37,7 @@
         scene.add(new THREE.AmbientLight(0x404040)); // Ambient light for softer illumination
 
         // Sun with texture
-        const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
+        const sunGeometry = new THREE.SphereGeometry(138.9, 32, 32);
         const sunMaterial = new THREE.MeshPhongMaterial({ map: sunTexture, emissive: 0xffff00 });
         const sun = new THREE.Mesh(sunGeometry, sunMaterial);
         scene.add(sun);
