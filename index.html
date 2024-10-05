@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -11,6 +11,7 @@
     </style>
 </head>
 <body>
+
 
     <div id="controls">
         <label for="speedControl">Orbit Speed:</label>
@@ -123,14 +124,7 @@
 
             const speedMultiplier = parseFloat(speedControl.value);
 
-            // Move the Sun in a circular path
-            const sunOrbitRadius = 15; // Radius of the Sun's orbit
-            const sunOrbitSpeed = 0.01; // Speed of the Sun's orbit
-            sun.position.x = sunOrbitRadius * Math.cos(Date.now() * 0.001 * sunOrbitSpeed);
-            sun.position.z = sunOrbitRadius * Math.sin(Date.now() * 0.001 * sunOrbitSpeed);
-
             planets.forEach(planetData => {
-                // Update planet rotation around the Sun
                 planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
 
                 // Update label position to follow the planet
