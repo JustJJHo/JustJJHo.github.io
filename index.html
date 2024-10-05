@@ -114,6 +114,15 @@
         controls.dampingFactor = 0.25;
         controls.enableZoom = true;
 
+        // Disable right-click for OrbitControls
+        controls.enablePan = false; // Disable panning
+        controls.enableRotate = true; // Allow rotation
+        controls.mouseButtons = {
+            LEFT: THREE.MOUSE.ROTATE,
+            MIDDLE: THREE.MOUSE.DOLLY,
+            RIGHT: null // Disable right-click
+        };
+
         // Speed control
         const speedControl = document.getElementById('speedControl');
 
@@ -145,6 +154,17 @@
 
                 // Update trail geometry
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
+            });
+
+            // Check if trails should disappear
+            planets.forEach(planetData => {
+                if (planetData.trailPoints.length > 0) {
+                    const startTime = performance.now();
+                    setTimeout(() => {
+                        planetData.trailPoints.length = 0; // Clear trail points
+                        planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3)); // Clear geometry
+                    }, 10000); // Trails disappear after 10 seconds
+                }
             });
 
             controls.update(); // Allow controls to update the camera position based on user interaction
