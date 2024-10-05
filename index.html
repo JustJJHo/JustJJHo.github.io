@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Orrery - Solar System with Textured Sun</title>
+    <title>3D Orrery - Solar System with Moving Sun</title>
     <style>
         body { margin: 0; }
         canvas { display: block; }
@@ -22,9 +22,7 @@
 
         // Load texture for the Sun
         const sunTextureUrl = 'https://upload.wikimedia.org/wikipedia/commons/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg'; // Your specified texture URL
-        const sunTexture = new THREE.TextureLoader().load(sunTextureUrl, function(texture) {
-            texture.needsUpdate = true; // Ensure the texture is updated
-        });
+        const sunTexture = new THREE.TextureLoader().load(sunTextureUrl);
 
         // Add a light source for the Sun
         const light = new THREE.PointLight(0xffffff, 1.5, 100);
@@ -86,23 +84,22 @@
         controls.dampingFactor = 0.25;
         controls.enableZoom = true;
 
-        // Animate function to rotate planets around the Sun and update trails
+        // Animation variables
+        let sunDirection = 0.01; // Direction of the Sun's movement
+
+        // Animate function to move the Sun left to right and update planets' orbits
         function animate() {
             requestAnimationFrame(animate);
 
+            // Move the Sun left and right
+            sun.position.x += sunDirection;
+            if (sun.position.x > 15 || sun.position.x < -15) {
+                sunDirection *= -1; // Reverse direction when reaching bounds
+            }
+
             // Rotate each planet around its pivot (orbiting the Sun)
             planets.forEach(planetData => {
-                planetData.pivot.rotation.y += planetData.orbitSpeed; // Adjust the rotation speed for accurate representation
-
-                // Get current planet position
-                const planetPosition = new THREE.Vector3();
-                planetData.planet.getWorldPosition(planetPosition);
-
-                // Add current position to trail points
-                planetData.trailPoints.push([planetPosition.x, planetPosition.y, planetPosition.z]);
-
-                // Update trail geometry
-                planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
+                planetData.pivot.rotation.y += planetData.orbitSpeed; // Orbit around the Sun
             });
 
             // Render the scene
