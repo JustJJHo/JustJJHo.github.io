@@ -26,10 +26,14 @@
         const sun = new THREE.Mesh(sunGeometry, sunMaterial);
         scene.add(sun);
 
+        // Load textures
+        const textureLoader = new THREE.TextureLoader();
+
         // Create a planet function with trails
-        function createPlanet(size, color, distance, orbitSpeed) {
+        function createPlanet(size, textureUrl, distance, orbitSpeed) {
             const planetGeometry = new THREE.SphereGeometry(size, 32, 32);
-            const planetMaterial = new THREE.MeshLambertMaterial({ color: color });
+            const planetTexture = textureLoader.load(textureUrl);
+            const planetMaterial = new THREE.MeshPhongMaterial({ map: planetTexture });
             const planet = new THREE.Mesh(planetGeometry, planetMaterial);
 
             // Create a pivot for orbiting
@@ -44,7 +48,7 @@
             const trailGeometry = new THREE.BufferGeometry();
             const trailPositions = new Float32Array(maxTrailPoints * 3);  // Each point has 3 values (x, y, z)
             trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
-            const trailMaterial = new THREE.LineBasicMaterial({ color: color });
+            const trailMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
             const trail = new THREE.Line(trailGeometry, trailMaterial);
             scene.add(trail);
 
@@ -53,14 +57,14 @@
 
         // Add planets to the scene with proper distances and sizes (scaled down for visualization)
         const planets = [
-            createPlanet(0.4, 0xaaaaaa, 6, 0.04),  // Mercury
-            createPlanet(0.9, 0xffa500, 8, 0.015), // Venus
-            createPlanet(1, 0x0000ff, 10, 0.01),   // Earth
-            createPlanet(0.8, 0xff0000, 12, 0.008),// Mars
-            createPlanet(2, 0xffff00, 16, 0.002),  // Jupiter
-            createPlanet(1.5, 0xffd700, 20, 0.001),// Saturn
-            createPlanet(1.2, 0x00ffff, 24, 0.0005),// Uranus
-            createPlanet(1.1, 0x0000ff, 28, 0.0003)// Neptune
+            createPlanet(0.4, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/mercury.jpg', 6, 0.04),  // Mercury
+            createPlanet(0.9, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/venus.jpg', 8, 0.015), // Venus
+            createPlanet(1, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/earth.jpg', 10, 0.01),   // Earth
+            createPlanet(0.8, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/mars.jpg', 12, 0.008), // Mars
+            createPlanet(2, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/jupiter.jpg', 16, 0.002),  // Jupiter
+            createPlanet(1.5, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/saturn.jpg', 20, 0.001), // Saturn
+            createPlanet(1.2, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/uranus.jpg', 24, 0.0005), // Uranus
+            createPlanet(1.1, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/neptune.jpg', 28, 0.0003) // Neptune
         ];
 
         // Lighting
@@ -104,6 +108,10 @@
             planets.forEach(planetData => {
                 planetData.pivot.rotation.y += planetData.orbitSpeed;
                 updateTrail(planetData);  // Update the orbit trail for each planet
+
+                // Set planet's position to orbit around the Sun
+                planetData.planet.position.x = planetData.distance * Math.cos(planetData.pivot.rotation.y);
+                planetData.planet.position.z = planetData.distance * Math.sin(planetData.pivot.rotation.y);
             });
 
             // Move the Sun through space (very slow drift)
