@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,7 +6,7 @@
     <title>3D Orrery - Solar System with Textured Sun</title>
     <style>
         body { margin: 0; background-image: url('2k_stars.jpg'); }
-        canvas { display: block; }
+        canvas { display: block; background-image: url('2k_stars.jpg'); }
         #controls { position: fixed; top: 10px; left: 10px; z-index: 10; }
     </style>
 </head>
@@ -72,13 +72,13 @@
 
             // Create a pivot for orbiting
             const pivot = new THREE.Object3D();
-            pivot.position.set(distance, 0, 0); // Set the pivot position to orbit distance
+            planet.position.set(distance, 0, 0);
             pivot.add(planet);
             scene.add(pivot);
 
             // Add label for the planet
             const label = createTextLabel(name);
-            label.position.set(distance, size + 1, 0); // Position label slightly above the planet
+            label.position.set(distance, 0, size + 1); // Position label slightly above the planet
             scene.add(label);
 
             // Orbit trail setup
@@ -104,21 +104,17 @@
             createPlanet(0.5, '2k_neptune.jpg', 28, 0.0007, 'Neptune')
         ];
 
-        // Set camera position to follow the Sun
-        camera.position.set(0, 10, 50);
+        // Set camera position
+        camera.position.set(0, 15, 50);
 
         // Orbit controls (to allow user to rotate the scene)
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.25;
         controls.enableZoom = true;
-        controls.target.set(0, 0, 0); // Set the camera target to the Sun
 
         // Speed control
         const speedControl = document.getElementById('speedControl');
-
-        // Variable to control the upward movement of the Sun and planets
-        let upwardMovement = 0;
 
         // Animate function to rotate planets and update labels
         function animate() {
@@ -126,20 +122,8 @@
 
             const speedMultiplier = parseFloat(speedControl.value);
 
-            // Move the Sun and planets upwards gradually
-            upwardMovement += 0.01; // Adjust speed of upward movement if necessary
-            sun.position.y = upwardMovement;
-            light.position.y = upwardMovement;
-
             planets.forEach(planetData => {
-                // Rotate the planet's pivot to create orbiting
                 planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
-
-                // Update the planet's position to orbit around the Sun
-                const angle = planetData.pivot.rotation.y;
-                planetData.planet.position.x = Math.cos(angle) * planetData.pivot.position.x; // Orbit in the X direction
-                planetData.planet.position.z = Math.sin(angle) * planetData.pivot.position.x; // Orbit in the Z direction
-                planetData.planet.position.y = upwardMovement; // Move upwards with the Sun
 
                 // Update label position to follow the planet
                 const planetPosition = new THREE.Vector3();
@@ -153,9 +137,6 @@
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
             });
 
-            // Move the camera with the Sun
-            camera.position.y = upwardMovement + 10; // Keep the camera above the Sun
-            controls.target.copy(sun.position); // Keep the camera looking at the Sun
             controls.update();
             renderer.render(scene, camera);
         }
