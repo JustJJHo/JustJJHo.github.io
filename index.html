@@ -116,14 +116,26 @@
         // Speed control
         const speedControl = document.getElementById('speedControl');
 
+        // Variable to control the upward movement of the Sun and planets
+        let upwardMovement = 0;
+
         // Animate function to rotate planets and update labels
         function animate() {
             requestAnimationFrame(animate);
 
             const speedMultiplier = parseFloat(speedControl.value);
 
+            // Move the Sun upwards gradually
+            upwardMovement += 0.01; // Adjust speed of upward movement if necessary
+            sun.position.y = upwardMovement;
+            light.position.y = upwardMovement;
+
             planets.forEach(planetData => {
+                // Rotate the planet's pivot to create orbiting
                 planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
+
+                // Tilt the planet's pivot to create upward movement (using X or Z axis)
+                planetData.pivot.rotation.x = upwardMovement * 0.02; // Apply a slight tilt based on upward movement
 
                 // Update label position to follow the planet
                 const planetPosition = new THREE.Vector3();
