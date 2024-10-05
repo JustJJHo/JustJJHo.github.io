@@ -112,8 +112,8 @@
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.25;
-        controls.enableZoom = false; // Disable zooming
-        controls.enablePan = false; // Disable panning
+        controls.enableZoom = true; // Enable zooming
+        controls.enablePan = true; // Enable panning
 
         // Speed control
         const speedControl = document.getElementById('speedControl');
