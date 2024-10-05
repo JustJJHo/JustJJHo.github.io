@@ -73,8 +73,7 @@
 
             // Create a pivot for orbiting
             const pivot = new THREE.Object3D();
-            pivot.position.set(0, 0, 0); // Position pivot at the Sun's location
-            planet.position.set(distance, 0, 0); // Position planet relative to the pivot (Sun)
+            planet.position.set(distance, 0, 0); // Position planet relative to the Sun
             pivot.add(planet);
             scene.add(pivot);
 
@@ -99,7 +98,6 @@
                 trailPoints,
                 label,
                 trailLength: 100, // Set a fixed length for the trail
-                angle: 0 // Initial angle for orbit
             };
         }
 
@@ -136,22 +134,22 @@
 
             const speedMultiplier = parseFloat(speedControl.value);
 
-            planets.forEach(planetData => {
-                // Increment the angle for the orbit
-                planetData.angle += planetData.orbitSpeed * speedMultiplier;
+            // Move the sun upwards and make speed adjustable
+            sun.position.y += 0.01 * speedMultiplier; // Change the speed of the upward movement here
 
-                // Calculate new position based on the angle
-                const x = planetData.distance * Math.cos(planetData.angle);
-                const z = planetData.distance * Math.sin(planetData.angle);
-                
-                // Update the planet's position
-                planetData.planet.position.set(x, 0, z);
+            planets.forEach(planetData => {
+                // Move the pivot upwards
+                planetData.pivot.position.y = sun.position.y; // Keep the pivot moving upwards
+
+                planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
 
                 // Update label position to follow the planet
-                planetData.label.position.set(x, 0, planetData.planet.geometry.parameters.radius + 1);
+                const planetPosition = new THREE.Vector3();
+                planetData.planet.getWorldPosition(planetPosition);
+                planetData.label.position.set(planetPosition.x, planetPosition.y + planetData.planet.geometry.parameters.radius + 1, planetPosition.z);
 
                 // Update trail points
-                planetData.trailPoints.push([x, 0, z]);
+                planetData.trailPoints.push([planetPosition.x, planetPosition.y, planetPosition.z]);
 
                 // Limit the number of points in the trail to create a constant length
                 if (planetData.trailPoints.length > planetData.trailLength) {
@@ -178,4 +176,3 @@
     </script>
 </body>
 </html>
-
