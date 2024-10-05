@@ -126,6 +126,9 @@
             // Move the sun upwards
             sun.position.y += 0.01; // Change the speed of the upward movement here
 
+            // Always keep the camera looking at the sun
+            camera.lookAt(sun.position);
+
             planets.forEach(planetData => {
                 // Move the pivot upwards
                 planetData.pivot.position.y = sun.position.y; // Keep the pivot moving upwards
@@ -144,7 +147,6 @@
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
             });
 
-            // Keep the sun centered
             controls.update();
             renderer.render(scene, camera);
         }
