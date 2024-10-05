@@ -84,7 +84,7 @@
 
             // Orbit trail setup
             const trailPoints = [];
-            const trailMaterial = new THREE.LineBasicMaterial({ color: planetMaterial.color, opacity: 0.5, transparent: true });
+            const trailMaterial = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5, transparent: true }); // Set to white
             const trailGeometry = new THREE.BufferGeometry();
             trailGeometry.setAttribute('position', new THREE.Float32BufferAttribute(trailPoints.flat(), 3));
             const trail = new THREE.Line(trailGeometry, trailMaterial);
@@ -155,24 +155,12 @@
                     planetData.trailPoints.shift(); // Remove the oldest point
                 }
 
-                // Update trail geometry
+                // Update the geometry of the trail
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
-                planetData.trail.geometry.attributes.position.needsUpdate = true; // Flag to update position
-
-                // Apply fading effect to the trail
-                const fadeLength = Math.min(20, planetData.trailPoints.length); // Length of the fading effect
-                const positions = planetData.trail.geometry.attributes.position.array;
-
-                for (let i = 0; i < fadeLength; i++) {
-                    const opacity = 1 - (i / fadeLength); // Calculate fade based on position
-                    const index = i * 3;
-                    const color = new THREE.Color(planetData.trail.material.color);
-                    color.multiplyScalar(opacity); // Fade color
-                    planetData.trail.material.color.set(color);
-                }
+                planetData.trail.geometry.attributes.position.needsUpdate = true; // Mark for update
             });
 
-            controls.update();
+            controls.update(); // Required for damping
             renderer.render(scene, camera);
         }
 
