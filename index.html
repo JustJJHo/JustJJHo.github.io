@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Orrery - Solar System with Textured Sun</title>
     <style>
-        body { margin: 0; }
+        body { margin: 0; bg:'2k_stars.jpg' }
         canvas { display: block; }
         #controls { position: fixed; top: 10px; left: 10px; z-index: 10; }
     </style>
@@ -34,7 +34,7 @@
         const light = new THREE.PointLight(0xffffff, 1.5, 100);
         light.position.set(0, 0, 0);
         scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040)); // Ambient light for softer illumination
+        scene.add(new THREE.AmbientLight(0xFFFFFF)); // Ambient light for softer illumination
 
         // Sun with texture
         const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
