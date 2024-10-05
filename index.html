@@ -70,16 +70,26 @@
             const planetMaterial = new THREE.MeshStandardMaterial({ map: loadTexture(textureUrl) });
             const planet = new THREE.Mesh(planetGeometry, planetMaterial);
 
-            // Set initial position for orbit
-            planet.position.x = distance; // Position planet at orbit distance
-            scene.add(planet);
+            // Create a pivot for orbiting
+            const pivot = new THREE.Object3D();
+            pivot.position.set(distance, 0, 0); // Set the pivot position to orbit distance
+            pivot.add(planet);
+            scene.add(pivot);
 
             // Add label for the planet
             const label = createTextLabel(name);
             label.position.set(distance, size + 1, 0); // Position label slightly above the planet
             scene.add(label);
 
-            return { planet, orbitSpeed, label };
+            // Orbit trail setup
+            const trailPoints = [];
+            const trailMaterial = new THREE.LineBasicMaterial({ color: planetMaterial.color });
+            const trailGeometry = new THREE.BufferGeometry();
+            trailGeometry.setAttribute('position', new THREE.Float32BufferAttribute(trailPoints.flat(), 3));
+            const trail = new THREE.Line(trailGeometry, trailMaterial);
+            scene.add(trail);
+
+            return { planet, pivot, orbitSpeed, trail, trailPoints, label };
         }
 
         // Create planets and their labels
@@ -122,19 +132,25 @@
             light.position.y = upwardMovement;
 
             planets.forEach(planetData => {
-                // Rotate the planet around the Sun
-                planetData.planet.rotation.y += planetData.orbitSpeed * speedMultiplier;
+                // Rotate the planet's pivot to create orbiting
+                planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
 
                 // Update the planet's position to orbit around the Sun
-                const angle = planetData.planet.rotation.y;
-                planetData.planet.position.x = Math.cos(angle) * planetData.planet.position.x; // Orbit in the X direction
-                planetData.planet.position.z = Math.sin(angle) * planetData.planet.position.x; // Orbit in the Z direction
+                const angle = planetData.pivot.rotation.y;
+                planetData.planet.position.x = Math.cos(angle) * planetData.pivot.position.x; // Orbit in the X direction
+                planetData.planet.position.z = Math.sin(angle) * planetData.pivot.position.x; // Orbit in the Z direction
                 planetData.planet.position.y = upwardMovement; // Move upwards with the Sun
 
                 // Update label position to follow the planet
                 const planetPosition = new THREE.Vector3();
                 planetData.planet.getWorldPosition(planetPosition);
                 planetData.label.position.set(planetPosition.x, planetPosition.y + planetData.planet.geometry.parameters.radius + 1, planetPosition.z);
+
+                // Add current position to trail points
+                planetData.trailPoints.push([planetPosition.x, planetPosition.y, planetPosition.z]);
+
+                // Update trail geometry
+                planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
             });
 
             // Move the camera with the Sun
