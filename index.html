@@ -27,7 +27,7 @@
         document.body.appendChild(renderer.domElement);
 
         // Load texture for the Sun
-        const sunTextureUrl = 'https://upload.wikimedia.org/wikipedia/commons/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg';
+        const sunTextureUrl = '2k_sun.jpg';
         const sunTexture = new THREE.TextureLoader().load(sunTextureUrl);
 
         // Add a light source for the Sun
@@ -90,14 +90,14 @@
 
         // Create planets and their labels
         const planets = [
-            createPlanet(0.2, 'https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg', 6, 0.04, 'Mercury'),
-            createPlanet(0.4, 'https://upload.wikimedia.org/wikipedia/commons/b/b2/Venus_2_Approach_Image.jpg', 8, 0.02, 'Venus'),
+            createPlanet(0.2, '2k_mercury.jpg', 6, 0.04, 'Mercury'),
+            createPlanet(0.4, '2k_venus_surface.jpg', 8, 0.02, 'Venus'),
             createPlanet(0.5, '2k_earth_daymap.jpg', 10, 0.015, 'Earth'),
-            createPlanet(0.4, 'https://upload.wikimedia.org/wikipedia/commons/0/0c/Mars_-_August_30_2021_-_Flickr_-_Kevin_M._Gill.png', 12, 0.012, 'Mars'),
-            createPlanet(0.8, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg', 16, 0.005, 'Jupiter'),
-            createPlanet(0.7, 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg', 20, 0.003, 'Saturn'),
-            createPlanet(0.6, 'https://upload.wikimedia.org/wikipedia/commons/6/69/Uranus_Voyager2_color_calibrated.png', 24, 0.001, 'Uranus'),
-            createPlanet(0.5, 'https://upload.wikimedia.org/wikipedia/commons/b/b9/Neptune_Voyager2_color_calibrated.png', 28, 0.0007, 'Neptune')
+            createPlanet(0.4, '2k_mars.jpg', 12, 0.012, 'Mars'),
+            createPlanet(0.8, '2k_jupiter.jpg', 16, 0.005, 'Jupiter'),
+            createPlanet(0.7, '2k_saturn.jpg', 20, 0.003, 'Saturn'),
+            createPlanet(0.6, '2k_uranus.jpg', 24, 0.001, 'Uranus'),
+            createPlanet(0.5, '2k_neptune.jpg', 28, 0.0007, 'Neptune')
         ];
 
         // Set camera position
