@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>R Code Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        code {
+            font-family: Consolas, monospace;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Kepler's Equation Solver in R</h1>
+
+    <pre><code>
+KeplerStart3 <- function(e,M) {
+    t34 <- e^2
+    t35 <- e * t34
+    t33 <- cos(M)
+
+    result <- M + (-1/2 * t35 + e + (t34 + 3/2 * t33 * t35) * t33) * sin(M)
+    return(result)
+}
+
+eps1 <- function(e,M,x) {
+    result <- (x - e * sin(x) - M) / (1 - e * cos(x))
+    return(result)
+}
+
+eps2 <- function(e,M,x) {
+    t1 <- -1 + e * cos(x)
+    t2 <- e * sin(x)
+    t3 <- -x + t2 + M
+    result <- t3 / (1/2 * t3 * t2 / t1 + t1)
+    return(result)
+}
+
+eps3 <- function(e,M,x) {
+    t1 <- cos(x)
+    t2 <- -1 + e * t1
+    t3 <- sin(x)
+    t4 <- e * t3
+    t5 <- -x + t4 + M
+    t6 <- t5 / (1/2 * t5 * t4 / t2 + t2)
+    result <- t5 / ((1/2 * t3 - 1/6 * t1 * t6) * e * t6 + t2)
+    return(result)
+}
+
+KeplerSolve <- function(e, M) {
+    tol <- 1.0e-14
+    Mnorm <- M %% 2 * pi
+    E0 <- KeplerStart3(e, Mnorm)
+    dE <- tol + 1
+    count <- 0
+
+    while (dE > tol) {
+        E <- E0 - eps3(e, Mnorm, E0)
+        dE <- abs(E - E0)
+        E0 <- E
+        count <- count + 1
+        
+        if (count == 100) {
+            msg <- "Astounding! KeplerSolve failed to converge!"
+            print(msg)
+            break
+        }
+    }
+
+    return(E)
+}
+
+propagate <- function(clock) {
+    T <- 120      # seconds
+    n <- 2 * pi / T
+    tau <- 0      # time of pericenter passage
+
+    M <- n * (clock - tau)
+    E <- KeplerSolve(e, M)
+    cose <- cos(E)
+
+    r = a * (1 - e * cose)
+    s.x <- r * ((cose - e) / (1 - e * cose))
+    s.y <- r * ((sqrt(1 - e^2) * sin(E)) / (1 - e * cose))
+    s.z <- 0
+    
+    point <- rotate3d(c(s.x, s.y, s.z), pi/5, 0, 1, 0)
+    point <- rotate3d(c(point[1], point[2], point[3]), pi/4, 0, 0, 1)
+    point <- rotate3d(c(point[1], point[2], point[3]), pi/4, 1, 0, 0)
+
+    return(point)
+}
+
+par3d(zoom=0.8)
+orbit <- plot3d(x.raan, y.raan, z.raan, type="l", col="black")
+spheres3d(0, 0, 0, radius=0.2, col="blue")
+
+ts <- 120  # Number of time slices.
+orbcoords <- cbind(1:ts, 0, 0)
+for (clock in 1:ts) {
+    loc <- propagate(clock)
+    orbcoords[clock, 1] <- loc[1]
+    orbcoords[clock, 2] <- loc[2]
+    orbcoords[clock, 3] <- loc[3]
+}
+
+sphereid <- spheres3d(xyz.coords(x=loc[1], y=loc[2], z=loc[3]), 
+                      radius=0.04, col="green")
+
+clock <- 1:ts
+rglwidget() %>%
+    playwidget(list(
+    ageControl(births = 1, ages = clock, vertices = orbcoords, objids = sphereid)),
+    start = 1, stop = max(clock), rate = 5,
+    components = c("Reverse", "Play", "Slower", "Faster", "Reset", "Slider", "Label"),
+    loop = TRUE)
+    </code></pre>
+
+</body>
+</html>
