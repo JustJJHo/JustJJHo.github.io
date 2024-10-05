@@ -37,15 +37,15 @@
 
         // Add a light source for the Sun
         const light = new THREE.PointLight(0xffffff, 1.5, 100);
-        light.position.set(0, 0, 0);
+        light.position.set(0, 0, 0); // Sun at the origin
         scene.add(light);
         scene.add(new THREE.AmbientLight(0xFFFFFF)); // Ambient light for softer illumination
 
-        // Sun with texture
+        // Sun with texture at the origin
         const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
         const sunMaterial = new THREE.MeshPhongMaterial({ map: sunTexture });
         const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-        scene.add(sun);
+        scene.add(sun); // Sun is now at (0, 0, 0)
 
         // Load textures for the planets
         const loadTexture = (url) => new THREE.TextureLoader().load(url);
@@ -73,7 +73,7 @@
 
             // Create a pivot for orbiting
             const pivot = new THREE.Object3D();
-            planet.position.set(distance, 0, 0);
+            planet.position.set(distance, 0, 0); // Position planet relative to the Sun
             pivot.add(planet);
             scene.add(pivot);
 
