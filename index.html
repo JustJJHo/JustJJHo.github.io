@@ -1,40 +1,191 @@
-// Animate function to rotate planets and update labels
-function animate() {
-    requestAnimationFrame(animate);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Orrery - Solar System with Textured Sun</title>
+    <style>
+        body { margin: 0; background-image: url('2k_stars.jpg'); }
+        canvas { display: block; }
+        #controls { position: fixed; top: 10px; left: 10px; z-index: 10; }
+    </style>
+</head>
+<body>
 
-    const speedMultiplier = parseFloat(speedControl.value);
+    <div id="controls">
+        <label for="speedControl">Orbit Speed:</label>
+        <input type="range" id="speedControl" min="0.1" max="10" value="1" step="0.1">
+    </div>
 
-    // Move the sun upwards (increased speed based on control)
-    sun.position.y += 0.05 * speedMultiplier; // Use the speed multiplier for upward movement
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
 
-    planets.forEach(planetData => {
-        // Move the pivot upwards
-        planetData.pivot.position.y = sun.position.y; // Keep the pivot moving upwards
+        // Load background texture for the stars
+        const backgroundTexture = new THREE.TextureLoader().load('2k_stars.jpg');
+        scene.background = backgroundTexture;
 
-        planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
+        // Load texture for the Sun
+        const sunTextureUrl = '2k_sun.jpg';
+        const sunTexture = new THREE.TextureLoader().load(sunTextureUrl);
 
-        // Update label position to follow the planet
-        const planetPosition = new THREE.Vector3();
-        planetData.planet.getWorldPosition(planetPosition);
-        planetData.label.position.set(planetPosition.x, planetPosition.y + planetData.planet.geometry.parameters.radius + 1, planetPosition.z);
+        // Add a light source for the Sun
+        const light = new THREE.PointLight(0xffffff, 1.5, 100);
+        light.position.set(0, 0, 0);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0xFFFFFF)); // Ambient light for softer illumination
 
-        // Update trail points and manage visibility
-        if (planetData.isTrailVisible) {
-            planetData.timeElapsed += 1 / 60; // Increment time (60 FPS assumption)
-            if (planetData.timeElapsed > 10) {
-                planetData.isTrailVisible = false; // Set trail visibility to false after 10 seconds
-            }
+        // Sun with texture
+        const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
+        const sunMaterial = new THREE.MeshPhongMaterial({ map: sunTexture });
+        const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+        scene.add(sun);
+
+        // Load textures for the planets
+        const loadTexture = (url) => new THREE.TextureLoader().load(url);
+
+        // Function to create text label sprites with increased size
+        function createTextLabel(text) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            context.font = '48px Arial'; // Increased font size
+            context.fillStyle = 'white';
+            context.fillText(text, 0, 48);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+            const sprite = new THREE.Sprite(spriteMaterial);
+            sprite.scale.set(4, 2, 1); // Adjusted sprite size for visibility
+            return sprite;
         }
 
-        // Update the trail geometry
-        if (planetData.isTrailVisible) {
-            planetData.trailPoints.push([planetPosition.x, planetPosition.y, planetPosition.z]);
-            planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
+        // Create a planet function with trails and labels
+        function createPlanet(size, textureUrl, distance, orbitSpeed, name) {
+            const planetGeometry = new THREE.SphereGeometry(size, 32, 32);
+            const planetMaterial = new THREE.MeshStandardMaterial({ map: loadTexture(textureUrl) });
+            const planet = new THREE.Mesh(planetGeometry, planetMaterial);
+
+            // Create a pivot for orbiting
+            const pivot = new THREE.Object3D();
+            planet.position.set(distance, 0, 0);
+            pivot.add(planet);
+            scene.add(pivot);
+
+            // Add label for the planet
+            const label = createTextLabel(name);
+            label.position.set(distance, 0, size + 1); // Position label slightly above the planet
+            scene.add(label);
+
+            // Orbit trail setup
+            const trailPoints = [];
+            const trailMaterial = new THREE.LineBasicMaterial({ color: planetMaterial.color });
+            const trailGeometry = new THREE.BufferGeometry();
+            trailGeometry.setAttribute('position', new THREE.Float32BufferAttribute(trailPoints.flat(), 3));
+            const trail = new THREE.Line(trailGeometry, trailMaterial);
+            scene.add(trail);
+
+            return {
+                planet,
+                pivot,
+                orbitSpeed,
+                trail,
+                trailPoints,
+                label,
+                timeElapsed: 0,
+                isTrailVisible: true
+            };
         }
-    });
 
-    controls.update();
-    renderer.render(scene, camera);
-}
+        // Create planets and their labels
+        const planets = [
+            createPlanet(0.2, '2k_mercury.jpg', 6, 0.04, 'Mercury'),
+            createPlanet(0.4, '2k_venus_surface.jpg', 8, 0.02, 'Venus'),
+            createPlanet(0.5, '2k_earth_daymap.jpg', 10, 0.015, 'Earth'),
+            createPlanet(0.4, '2k_mars.jpg', 12, 0.012, 'Mars'),
+            createPlanet(0.8, '2k_jupiter.jpg', 16, 0.005, 'Jupiter'),
+            createPlanet(0.7, '2k_saturn.jpg', 20, 0.003, 'Saturn'),
+            createPlanet(0.6, '2k_uranus.jpg', 24, 0.001, 'Uranus'),
+            createPlanet(0.5, '2k_neptune.jpg', 28, 0.0007, 'Neptune')
+        ];
 
-animate();
+        // Set initial camera position
+        camera.position.set(0, 15, 50); // Adjust height and distance from the sun
+
+        // Orbit controls (to allow user to rotate and tilt the scene)
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.25;
+        controls.enableZoom = true;
+        controls.enableRotate = true; // Allow rotation
+        controls.screenSpacePanning = false; // Prevent panning in the screen space
+
+        // Speed control
+        const speedControl = document.getElementById('speedControl');
+
+        // Animate function to rotate planets and update labels
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const speedMultiplier = parseFloat(speedControl.value);
+
+            // Move the sun upwards
+            sun.position.y += 0.01; // Change the speed of the upward movement here
+
+            planets.forEach(planetData => {
+                // Move the pivot upwards
+                planetData.pivot.position.y = sun.position.y; // Keep the pivot moving upwards
+
+                planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
+
+                // Update label position to follow the planet
+                const planetPosition = new THREE.Vector3();
+                planetData.planet.getWorldPosition(planetPosition);
+                planetData.label.position.set(planetPosition.x, planetPosition.y + planetData.planet.geometry.parameters.radius + 1, planetPosition.z);
+
+                // Update trail points and manage visibility
+                if (planetData.isTrailVisible) {
+                    planetData.timeElapsed += 1 / 60; // Increment time (60 FPS)
+                    planetData.trailPoints.push([planetPosition.x, planetPosition.y, planetPosition.z]);
+
+                    // Update trail geometry
+                    planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
+
+                    // Remove oldest point from trail if it exceeds 10 seconds of trail length
+                    if (planetData.trailPoints.length > 60 * 10) { // 60 FPS * 10 seconds
+                        planetData.trailPoints.shift(); // Remove the oldest point
+                    }
+
+                    // Hide trail after 10 seconds
+                    if (planetData.timeElapsed > 10) {
+                        planetData.isTrailVisible = false;
+                        planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3)); // Clear trail
+                    }
+                } else {
+                    // Reset trail after it disappears
+                    planetData.trailPoints.length = 0; // Clear points
+                    planetData.isTrailVisible = true; // Re-enable trail visibility
+                    planetData.timeElapsed = 0; // Reset time elapsed
+                }
+            });
+
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
