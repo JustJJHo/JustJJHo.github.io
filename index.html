@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Orrery with Orbit Lines</title>
+    <title>3D Orrery - Solar System</title>
     <style>
         body { margin: 0; }
         canvas { display: block; }
@@ -36,7 +36,7 @@
         }
 
         // Create a planet function
-        function createPlanet(size, color, distance) {
+        function createPlanet(size, color, distance, orbitSpeed) {
             const planetGeometry = new THREE.SphereGeometry(size, 32, 32);
             const planetMaterial = new THREE.MeshLambertMaterial({ color: color });
             const planet = new THREE.Mesh(planetGeometry, planetMaterial);
@@ -51,20 +51,28 @@
             // Add orbit line
             createOrbit(distance);
 
-            return { planet, pivot };
+            return { planet, pivot, orbitSpeed };
         }
 
-        // Create Earth and Mars
-        const earthData = createPlanet(1, 0x0000ff, 10);  // Earth is blue and orbits 10 units away from the sun
-        const marsData = createPlanet(0.8, 0xff0000, 15);  // Mars is red and orbits 15 units away from the sun
+        // Add planets to the scene with proper distances and sizes (scaled down for visualization)
+        const planets = [
+            createPlanet(0.4, 0xaaaaaa, 6, 0.04),  // Mercury
+            createPlanet(0.9, 0xffa500, 8, 0.015), // Venus
+            createPlanet(1, 0x0000ff, 10, 0.01),   // Earth
+            createPlanet(0.8, 0xff0000, 12, 0.008),// Mars
+            createPlanet(2, 0xffff00, 16, 0.002),  // Jupiter
+            createPlanet(1.5, 0xffd700, 20, 0.001),// Saturn
+            createPlanet(1.2, 0x00ffff, 24, 0.0005),// Uranus
+            createPlanet(1.1, 0x0000ff, 28, 0.0003)// Neptune
+        ];
 
         // Lighting
         const light = new THREE.PointLight(0xffffff, 1.5, 100);
-        light.position.set(0, 0, 0);  // Light is at the sun
+        light.position.set(0, 0, 0);  // Light is at the Sun
         scene.add(light);
 
         // Set camera position
-        camera.position.z = 30;
+        camera.position.z = 50;
 
         // Orbit controls (to allow user to rotate the scene)
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -72,13 +80,23 @@
         controls.dampingFactor = 0.25;
         controls.enableZoom = true;
 
-        // Animation function
+        // Animate function to rotate planets around the Sun
         function animate() {
             requestAnimationFrame(animate);
 
-            // Rotate planets around their pivots (orbiting the sun)
-            earthData.pivot.rotation.y += 0.01;  // Earth's orbit
-            marsData.pivot.rotation.y += 0.008;  // Mars's orbit
+            // Rotate each planet around its pivot (orbiting the Sun)
+            planets.forEach(planetData => {
+                planetData.pivot.rotation.y += planetData.orbitSpeed;
+            });
+
+            // Move the Sun through space (very slow drift)
+            sun.position.x += 0.001;
+            sun.position.z += 0.001;
+
+            // Also move the planet pivots with the Sun
+            planets.forEach(planetData => {
+                planetData.pivot.position.copy(sun.position);  // Keep pivot centered on the Sun
+            });
 
             // Render the scene
             controls.update();
