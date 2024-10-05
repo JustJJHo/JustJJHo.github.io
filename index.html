@@ -30,7 +30,7 @@
         scene.add(light);
 
         // Sun with texture
-        const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
+        const sunGeometry = new THREE.SphereGeometry(1.5, 32, 32); // Adjusted size to be smaller
         const sunMaterial = new THREE.MeshPhongMaterial({ map: sunTexture }); // Use Phong material for lighting
         const sun = new THREE.Mesh(sunGeometry, sunMaterial);
         scene.add(sun);
