@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Orrery - Solar System</title>
+    <title>3D Orrery - Solar System with Orbit Trails</title>
     <style>
         body { margin: 0; }
         canvas { display: block; }
@@ -26,31 +26,29 @@
         const sun = new THREE.Mesh(sunGeometry, sunMaterial);
         scene.add(sun);
 
-        // Create an orbit line function
-        function createOrbit(distance) {
-            const orbitGeometry = new THREE.RingGeometry(distance - 0.05, distance + 0.05, 64);
-            const orbitMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
-            const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
-            orbit.rotation.x = Math.PI / 2;  // Align the ring to lay flat (horizontal)
-            return orbit;
-        }
-
-        // Create a planet function
+        // Create a planet function with trails
         function createPlanet(size, color, distance, orbitSpeed) {
             const planetGeometry = new THREE.SphereGeometry(size, 32, 32);
             const planetMaterial = new THREE.MeshLambertMaterial({ color: color });
             const planet = new THREE.Mesh(planetGeometry, planetMaterial);
 
-            // Create a pivot for orbiting and orbit line
+            // Create a pivot for orbiting
             const pivot = new THREE.Object3D();
             pivot.position.set(0, 0, 0);
             planet.position.set(distance, 0, 0);
             pivot.add(planet);
-            const orbitLine = createOrbit(distance);
-            pivot.add(orbitLine);  // Add orbit line to the pivot so it moves with the planet
             scene.add(pivot);
 
-            return { planet, pivot, orbitSpeed };
+            // Orbit trail setup
+            const maxTrailPoints = 200;
+            const trailGeometry = new THREE.BufferGeometry();
+            const trailPositions = new Float32Array(maxTrailPoints * 3);  // Each point has 3 values (x, y, z)
+            trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
+            const trailMaterial = new THREE.LineBasicMaterial({ color: color });
+            const trail = new THREE.Line(trailGeometry, trailMaterial);
+            scene.add(trail);
+
+            return { planet, pivot, orbitSpeed, trail, trailPositions, maxTrailPoints, trailIndex: 0 };
         }
 
         // Add planets to the scene with proper distances and sizes (scaled down for visualization)
@@ -79,22 +77,42 @@
         controls.dampingFactor = 0.25;
         controls.enableZoom = true;
 
-        // Animate function to rotate planets around the Sun
+        // Update trail for each planet
+        function updateTrail(planetData) {
+            const trailPositions = planetData.trailPositions;
+            const maxTrailPoints = planetData.maxTrailPoints;
+
+            // Get current planet position
+            const planetPosition = new THREE.Vector3();
+            planetData.planet.getWorldPosition(planetPosition);
+
+            // Update trail positions with the latest planet position
+            planetData.trailIndex = (planetData.trailIndex + 1) % maxTrailPoints;
+
+            trailPositions.copyWithin(0, 3);  // Shift older points
+            trailPositions.set([planetPosition.x, planetPosition.y, planetPosition.z], trailPositions.length - 3);
+
+            // Update the geometry
+            planetData.trail.geometry.attributes.position.needsUpdate = true;
+        }
+
+        // Animate function to rotate planets around the Sun and update trails
         function animate() {
             requestAnimationFrame(animate);
 
             // Rotate each planet around its pivot (orbiting the Sun)
             planets.forEach(planetData => {
                 planetData.pivot.rotation.y += planetData.orbitSpeed;
+                updateTrail(planetData);  // Update the orbit trail for each planet
             });
 
             // Move the Sun through space (very slow drift)
             sun.position.x += 0.001;
             sun.position.z += 0.001;
 
-            // Move all planets and their orbits with the Sun
+            // Move all planets and their trails with the Sun
             planets.forEach(planetData => {
-                planetData.pivot.position.copy(sun.position);  // Keep pivot and orbit line centered on the Sun
+                planetData.pivot.position.copy(sun.position);  // Keep pivot and planets centered on the Sun
             });
 
             // Render the scene
