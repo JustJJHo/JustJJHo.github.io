@@ -52,15 +52,7 @@
             pivot.add(planet);
             scene.add(pivot);
 
-            // Orbit trail setup
-            const trailPoints = [];
-            const trailMaterial = new THREE.LineBasicMaterial({ color: planetMaterial.color });
-            const trailGeometry = new THREE.BufferGeometry();
-            trailGeometry.setAttribute('position', new THREE.Float32BufferAttribute(trailPoints.flat(), 3));
-            const trail = new THREE.Line(trailGeometry, trailMaterial);
-            scene.add(trail);
-
-            return { planet, pivot, orbitSpeed, trail, trailPoints };
+            return { planet, pivot, orbitSpeed };
         }
 
         // Updated planets with consistent sizes and orbits
@@ -85,16 +77,16 @@
         controls.enableZoom = true;
 
         // Animation variables
-        let sunDirection = 0.01; // Direction of the Sun's movement
+        let sunDirection = -0.01; // Start moving the Sun to the left (negative X direction)
 
-        // Animate function to move the Sun left to right and update planets' orbits
+        // Animate function to move the Sun from positive to negative X and update planets' orbits
         function animate() {
             requestAnimationFrame(animate);
 
-            // Move the Sun left and right
+            // Move the Sun from positive X to negative X
             sun.position.x += sunDirection;
-            if (sun.position.x > 15 || sun.position.x < -15) {
-                sunDirection *= -1; // Reverse direction when reaching bounds
+            if (sun.position.x < -15) {
+                sun.position.x = 15; // Reset Sun's position when it moves out of bounds
             }
 
             // Rotate each planet around its pivot (orbiting the Sun)
