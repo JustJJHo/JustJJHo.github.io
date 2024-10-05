@@ -50,18 +50,18 @@
         // Load textures for the planets
         const loadTexture = (url) => new THREE.TextureLoader().load(url);
 
-        // Function to create text label sprites
+        // Function to create text label sprites with increased size
         function createTextLabel(text) {
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
-            context.font = '24px Arial';
+            context.font = '48px Arial'; // Increased font size
             context.fillStyle = 'white';
-            context.fillText(text, 0, 24);
+            context.fillText(text, 0, 48);
 
             const texture = new THREE.CanvasTexture(canvas);
             const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
             const sprite = new THREE.Sprite(spriteMaterial);
-            sprite.scale.set(2, 1, 1);
+            sprite.scale.set(4, 2, 1); // Adjusted sprite size for visibility
             return sprite;
         }
 
@@ -108,11 +108,13 @@
         // Set initial camera position
         camera.position.set(0, 15, 50); // Adjust height and distance from the sun
 
-        // Orbit controls (to allow user to rotate the scene)
+        // Orbit controls (to allow user to rotate and tilt the scene)
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.25;
         controls.enableZoom = true;
+        controls.enableRotate = true; // Allow rotation
+        controls.screenSpacePanning = false; // Prevent panning in the screen space
 
         // Speed control
         const speedControl = document.getElementById('speedControl');
@@ -125,10 +127,6 @@
 
             // Move the sun upwards
             sun.position.y += 0.01; // Change the speed of the upward movement here
-
-            // Update camera position to follow the sun
-            camera.position.y = sun.position.y + 50; // Keep camera above sun
-            camera.lookAt(sun.position); // Keep the camera looking at the sun
 
             planets.forEach(planetData => {
                 // Move the pivot upwards
@@ -144,14 +142,13 @@
                 // Add current position to trail points
                 planetData.trailPoints.push([planetPosition.x, planetPosition.y, planetPosition.z]);
 
-                // Remove old points after 3 seconds (assuming 60 FPS)
-                const timeThreshold = 3 * 60; // 3 seconds in frames
-                if (planetData.trailPoints.length > timeThreshold) {
-                    planetData.trailPoints.shift(); // Remove the oldest point
-                }
-
                 // Update trail geometry
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
+
+                // Remove oldest point from trail if it exceeds 3 seconds of trail length
+                if (planetData.trailPoints.length > 180) { // 60 fps * 3 seconds
+                    planetData.trailPoints.shift(); // Remove the oldest point
+                }
             });
 
             controls.update();
