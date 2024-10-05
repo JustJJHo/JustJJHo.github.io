@@ -114,7 +114,7 @@
         ];
 
         // Set initial camera position
-        camera.position.set(0, 75, 50); // Adjust height and distance from the sun
+        camera.position.set(0, 15, 50); // Adjust height and distance from the sun
 
         // Orbit controls (to allow user to rotate and tilt the scene)
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -134,19 +134,14 @@
 
             const speedMultiplier = parseFloat(speedControl.value);
 
-            // Move the sun upwards and make speed adjustable
-            sun.position.y += 0.01 * speedMultiplier; // Change the speed of the upward movement here
-
-            // Update camera position to follow the Sun
-            camera.position.y = sun.position.y + 15; // Keep the camera above the Sun
-            camera.position.z = 50; // Maintain a fixed distance from the Sun
-            camera.lookAt(sun.position); // Make the camera look at the Sun
-
             planets.forEach(planetData => {
-                // Move the pivot upwards
-                planetData.pivot.position.y = sun.position.y; // Keep the pivot moving upwards
-
+                // Rotate around the Sun
                 planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
+
+                // Update the planet's position based on the pivot's rotation
+                const distance = planetData.planet.position.length();
+                planetData.planet.position.x = distance * Math.cos(planetData.pivot.rotation.y);
+                planetData.planet.position.z = distance * Math.sin(planetData.pivot.rotation.y);
 
                 // Update label position to follow the planet
                 const planetPosition = new THREE.Vector3();
