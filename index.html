@@ -120,9 +120,11 @@
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.25;
-        controls.enableZoom = true;
+        controls.enableZoom = true; // Enable zooming
         controls.enableRotate = true; // Allow rotation
         controls.screenSpacePanning = false; // Prevent panning in the screen space
+        controls.minDistance = 10; // Minimum zoom distance
+        controls.maxDistance = 200; // Maximum zoom distance
 
         // Lock the target of controls to the Sun
         controls.target.set(0, 0, 0); // Position of the Sun
