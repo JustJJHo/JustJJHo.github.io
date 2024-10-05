@@ -20,11 +20,6 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Lighting
-        const light = new THREE.PointLight(0xffffff, 1.5, 100);
-        light.position.set(0, 0, 0);  // Light is at the Sun
-        scene.add(light);
-
         // Sun
         const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
         const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
@@ -37,7 +32,7 @@
         // Create a planet function with trails
         function createPlanet(size, textureUrl, distance, orbitSpeed) {
             const planetGeometry = new THREE.SphereGeometry(size, 32, 32);
-            const planetMaterial = new THREE.MeshLambertMaterial({ map: loadTexture(textureUrl) });
+            const planetMaterial = new THREE.MeshBasicMaterial({ map: loadTexture(textureUrl) });
             const planet = new THREE.Mesh(planetGeometry, planetMaterial);
 
             // Create a pivot for orbiting
@@ -60,14 +55,14 @@
 
         // Add planets to the scene with proper distances and sizes (scaled down for visualization)
         const planets = [
-            createPlanet(0.4, 'https://upload.wikimedia.org/wikipedia/commons/2/29/Mercury.jpg', 6, 0.04),  // Mercury
-            createPlanet(0.9, 'https://upload.wikimedia.org/wikipedia/commons/8/89/Venus_%28planet%29.jpg', 8, 0.015), // Venus
-            createPlanet(1, 'https://upload.wikimedia.org/wikipedia/commons/8/83/Earth_political_map.png', 10, 0.01),   // Earth
-            createPlanet(0.8, 'https://upload.wikimedia.org/wikipedia/commons/0/02/Mars.svg', 12, 0.008),// Mars
-            createPlanet(2, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg', 16, 0.002),  // Jupiter
-            createPlanet(1.5, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Saturn.jpg', 20, 0.001),// Saturn
-            createPlanet(1.2, 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Uranus.png', 24, 0.0005),// Uranus
-            createPlanet(1.1, 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Neptune.png', 28, 0.0003)// Neptune
+            createPlanet(0.4, 'https://upload.wikimedia.org/wikipedia/commons/2/29/Mercury.jpg', 6, 0.1),  // Mercury
+            createPlanet(0.9, 'https://upload.wikimedia.org/wikipedia/commons/8/89/Venus_%28planet%29.jpg', 8, 0.07), // Venus
+            createPlanet(1, 'https://upload.wikimedia.org/wikipedia/commons/8/83/Earth_political_map.png', 10, 0.05),   // Earth
+            createPlanet(0.8, 'https://upload.wikimedia.org/wikipedia/commons/0/02/Mars.svg', 12, 0.04),// Mars
+            createPlanet(2, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg', 16, 0.02),  // Jupiter
+            createPlanet(1.5, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Saturn.jpg', 20, 0.015),// Saturn
+            createPlanet(1.2, 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Uranus.png', 24, 0.01),// Uranus
+            createPlanet(1.1, 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Neptune.png', 28, 0.008)// Neptune
         ];
 
         // Set camera position
@@ -98,8 +93,8 @@
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
 
                 // Move the Sun through space (very slow drift)
-                sun.position.x += 0.001;
-                sun.position.z += 0.001;
+                sun.position.x += 0.0001;
+                sun.position.z += 0.0001;
 
                 // Move all planets and their trails with the Sun
                 planetData.pivot.position.copy(sun.position);  // Keep pivot and planets centered on the Sun
