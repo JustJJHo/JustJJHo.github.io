@@ -114,17 +114,15 @@
         ];
 
         // Set initial camera position
-        camera.position.set(0, 75, 50); // Adjust height and distance from the sun
+        camera.position.set(0, 15, 50); // Adjust height and distance from the sun
 
         // Orbit controls (to allow user to rotate and tilt the scene)
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.25;
-        controls.enableZoom = true; // Enable zooming
+        controls.enableZoom = true;
         controls.enableRotate = true; // Allow rotation
         controls.screenSpacePanning = false; // Prevent panning in the screen space
-        controls.minDistance = 10; // Minimum zoom distance
-        controls.maxDistance = 200; // Maximum zoom distance
 
         // Lock the target of controls to the Sun
         controls.target.set(0, 0, 0); // Position of the Sun
@@ -162,9 +160,6 @@
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
                 planetData.trail.geometry.attributes.position.needsUpdate = true; // Mark for update
             });
-
-            // Update camera position to follow the sun, maintaining a height of 75 units above it
-            camera.position.set(sun.position.x, sun.position.y + 75, sun.position.z + 50); // You can adjust the z-position for better viewing angle
 
             controls.update(); // Required for damping
             renderer.render(scene, camera);
