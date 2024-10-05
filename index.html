@@ -108,11 +108,11 @@
         // Set initial camera position
         camera.position.set(0, 15, 50); // Adjust height and distance from the sun
 
-        // Remove OrbitControls to disable mouse interaction
-        // const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        // controls.enableDamping = true;
-        // controls.dampingFactor = 0.25;
-        // controls.enableZoom = true;
+        // Initialize OrbitControls
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.25;
+        controls.enableZoom = true;
 
         // Speed control
         const speedControl = document.getElementById('speedControl');
@@ -126,9 +126,8 @@
             // Move the sun upwards based on the speed control
             sun.position.y += 0.01 * speedMultiplier; // Change the speed of the upward movement here
 
-            // Update camera position to follow the sun
-            camera.position.set(sun.position.x, sun.position.y + 15, sun.position.z + 50); // Keep camera above sun and at a fixed distance
-            camera.lookAt(sun.position); // Keep the camera looking at the sun
+            // Keep the camera locked on the sun's position
+            camera.lookAt(sun.position); // Always look at the sun
 
             planets.forEach(planetData => {
                 // Move the pivot upwards
@@ -148,7 +147,7 @@
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
             });
 
-            // controls.update(); // Remove this line since controls are disabled
+            controls.update(); // Allow controls to update the camera position based on user interaction
             renderer.render(scene, camera);
         }
 
