@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Orrery - Solar System with Realistic Planets and Permanent Trails</title>
+    <title>3D Orrery - Solar System with Clear Planets</title>
     <style>
         body { margin: 0; }
         canvas { display: block; }
@@ -20,12 +20,7 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Lighting
-        const light = new THREE.PointLight(0xffffff, 1.5, 100);
-        light.position.set(0, 0, 0);  // Light is at the Sun
-        scene.add(light);
-
-        // Sun
+        // Remove lighting effect from the sun and use a basic material for clarity
         const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
         const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
         const sun = new THREE.Mesh(sunGeometry, sunMaterial);
@@ -37,7 +32,8 @@
         // Create a planet function with trails
         function createPlanet(size, textureUrl, distance, orbitSpeed) {
             const planetGeometry = new THREE.SphereGeometry(size, 32, 32);
-            const planetMaterial = new THREE.MeshLambertMaterial({ map: loadTexture(textureUrl) });
+            // Use MeshBasicMaterial for all planets to remove lighting effects
+            const planetMaterial = new THREE.MeshBasicMaterial({ map: loadTexture(textureUrl) });
             const planet = new THREE.Mesh(planetGeometry, planetMaterial);
 
             // Create a pivot for orbiting
@@ -60,14 +56,14 @@
 
         // Add planets to the scene with proper distances and sizes (scaled down for visualization)
         const planets = [
-            createPlanet(0.4, 'https://upload.wikimedia.org/wikipedia/commons/2/29/Mercury.jpg', 6, 0.04),  // Mercury
-            createPlanet(0.9, 'https://upload.wikimedia.org/wikipedia/commons/8/89/Venus_%28planet%29.jpg', 8, 0.015), // Venus
-            createPlanet(1, 'https://upload.wikimedia.org/wikipedia/commons/8/83/Earth_political_map.png', 10, 0.01),   // Earth
-            createPlanet(0.8, 'https://upload.wikimedia.org/wikipedia/commons/0/02/Mars.svg', 12, 0.008), // Mars
-            createPlanet(2, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg', 16, 0.002),  // Jupiter
-            createPlanet(1.5, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Saturn.jpg', 20, 0.001), // Saturn
-            createPlanet(1.2, 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Uranus.png', 24, 0.0005), // Uranus
-            createPlanet(1.1, 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Neptune.png', 28, 0.0003) // Neptune
+            createPlanet(0.4, 'https://upload.wikimedia.org/wikipedia/commons/2/29/Mercury.jpg', 6, 0.04),  // Mercury (58 days)
+            createPlanet(0.9, 'https://upload.wikimedia.org/wikipedia/commons/8/89/Venus_%28planet%29.jpg', 8, 0.015), // Venus (225 days)
+            createPlanet(1, 'https://upload.wikimedia.org/wikipedia/commons/8/83/Earth_political_map.png', 10, 0.01),   // Earth (365 days)
+            createPlanet(0.8, 'https://upload.wikimedia.org/wikipedia/commons/0/02/Mars.svg', 12, 0.008), // Mars (687 days)
+            createPlanet(2, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg', 16, 0.002),  // Jupiter (11.86 years)
+            createPlanet(1.5, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Saturn.jpg', 20, 0.001), // Saturn (29.46 years)
+            createPlanet(1.2, 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Uranus.png', 24, 0.0005), // Uranus (84 years)
+            createPlanet(1.1, 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Neptune.png', 28, 0.0003) // Neptune (164.8 years)
         ];
 
         // Set camera position
@@ -85,7 +81,7 @@
 
             // Rotate each planet around its pivot (orbiting the Sun)
             planets.forEach(planetData => {
-                planetData.pivot.rotation.y += planetData.orbitSpeed;
+                planetData.pivot.rotation.y += planetData.orbitSpeed; // Adjust the rotation speed for accurate representation
 
                 // Get current planet position
                 const planetPosition = new THREE.Vector3();
@@ -97,13 +93,6 @@
                 // Update trail geometry
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
             });
-
-            // Move the Sun through space (very slow drift)
-            sun.position.x += 0.001;
-            sun.position.z += 0.001;
-
-            // Update light position to always be at the Sun's position
-            light.position.set(sun.position.x, sun.position.y, sun.position.z);
 
             // Render the scene
             controls.update();
