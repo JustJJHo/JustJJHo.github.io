@@ -32,7 +32,7 @@
             const orbitMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
             const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
             orbit.rotation.x = Math.PI / 2;  // Align the ring to lay flat (horizontal)
-            scene.add(orbit);
+            return orbit;
         }
 
         // Create a planet function
@@ -41,15 +41,14 @@
             const planetMaterial = new THREE.MeshLambertMaterial({ color: color });
             const planet = new THREE.Mesh(planetGeometry, planetMaterial);
 
-            // Create a pivot for orbiting
+            // Create a pivot for orbiting and orbit line
             const pivot = new THREE.Object3D();
             pivot.position.set(0, 0, 0);
             planet.position.set(distance, 0, 0);
             pivot.add(planet);
+            const orbitLine = createOrbit(distance);
+            pivot.add(orbitLine);  // Add orbit line to the pivot so it moves with the planet
             scene.add(pivot);
-
-            // Add orbit line
-            createOrbit(distance);
 
             return { planet, pivot, orbitSpeed };
         }
@@ -93,9 +92,9 @@
             sun.position.x += 0.001;
             sun.position.z += 0.001;
 
-            // Also move the planet pivots with the Sun
+            // Move all planets and their orbits with the Sun
             planets.forEach(planetData => {
-                planetData.pivot.position.copy(sun.position);  // Keep pivot centered on the Sun
+                planetData.pivot.position.copy(sun.position);  // Keep pivot and orbit line centered on the Sun
             });
 
             // Render the scene
