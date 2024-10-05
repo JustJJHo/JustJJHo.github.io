@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Orrery - Solar System with Orbit Trails</title>
+    <title>3D Orrery - Solar System with Realistic Planets and Permanent Trails</title>
     <style>
         body { margin: 0; }
         canvas { display: block; }
@@ -20,20 +20,24 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
+        // Lighting
+        const light = new THREE.PointLight(0xffffff, 1.5, 100);
+        light.position.set(0, 0, 0);  // Light is at the Sun
+        scene.add(light);
+
         // Sun
         const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
         const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffff00 });
         const sun = new THREE.Mesh(sunGeometry, sunMaterial);
         scene.add(sun);
 
-        // Load textures
-        const textureLoader = new THREE.TextureLoader();
+        // Load textures for the planets
+        const loadTexture = (url) => new THREE.TextureLoader().load(url);
 
         // Create a planet function with trails
         function createPlanet(size, textureUrl, distance, orbitSpeed) {
             const planetGeometry = new THREE.SphereGeometry(size, 32, 32);
-            const planetTexture = textureLoader.load(textureUrl);
-            const planetMaterial = new THREE.MeshPhongMaterial({ map: planetTexture });
+            const planetMaterial = new THREE.MeshLambertMaterial({ map: loadTexture(textureUrl) });
             const planet = new THREE.Mesh(planetGeometry, planetMaterial);
 
             // Create a pivot for orbiting
@@ -44,33 +48,27 @@
             scene.add(pivot);
 
             // Orbit trail setup
-            const maxTrailPoints = 200;
+            const trailPoints = [];
+            const trailMaterial = new THREE.LineBasicMaterial({ color: planetMaterial.color });
             const trailGeometry = new THREE.BufferGeometry();
-            const trailPositions = new Float32Array(maxTrailPoints * 3);  // Each point has 3 values (x, y, z)
-            trailGeometry.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
-            const trailMaterial = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
+            trailGeometry.setAttribute('position', new THREE.Float32BufferAttribute(trailPoints.flat(), 3));
             const trail = new THREE.Line(trailGeometry, trailMaterial);
             scene.add(trail);
 
-            return { planet, pivot, orbitSpeed, trail, trailPositions, maxTrailPoints, trailIndex: 0 };
+            return { planet, pivot, orbitSpeed, trail, trailPoints };
         }
 
         // Add planets to the scene with proper distances and sizes (scaled down for visualization)
         const planets = [
-            createPlanet(0.4, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/mercury.jpg', 6, 0.04),  // Mercury
-            createPlanet(0.9, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/venus.jpg', 8, 0.015), // Venus
-            createPlanet(1, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/earth.jpg', 10, 0.01),   // Earth
-            createPlanet(0.8, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/mars.jpg', 12, 0.008), // Mars
-            createPlanet(2, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/jupiter.jpg', 16, 0.002),  // Jupiter
-            createPlanet(1.5, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/saturn.jpg', 20, 0.001), // Saturn
-            createPlanet(1.2, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/uranus.jpg', 24, 0.0005), // Uranus
-            createPlanet(1.1, 'https://raw.githubusercontent.com/interactive-coding-book/sun-moon-earth-solar-system/master/neptune.jpg', 28, 0.0003) // Neptune
+            createPlanet(0.4, 'https://upload.wikimedia.org/wikipedia/commons/2/29/Mercury.jpg', 6, 0.04),  // Mercury
+            createPlanet(0.9, 'https://upload.wikimedia.org/wikipedia/commons/8/89/Venus_%28planet%29.jpg', 8, 0.015), // Venus
+            createPlanet(1, 'https://upload.wikimedia.org/wikipedia/commons/8/83/Earth_political_map.png', 10, 0.01),   // Earth
+            createPlanet(0.8, 'https://upload.wikimedia.org/wikipedia/commons/0/02/Mars.svg', 12, 0.008),// Mars
+            createPlanet(2, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg', 16, 0.002),  // Jupiter
+            createPlanet(1.5, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Saturn.jpg', 20, 0.001),// Saturn
+            createPlanet(1.2, 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Uranus.png', 24, 0.0005),// Uranus
+            createPlanet(1.1, 'https://upload.wikimedia.org/wikipedia/commons/5/5b/Neptune.png', 28, 0.0003)// Neptune
         ];
-
-        // Lighting
-        const light = new THREE.PointLight(0xffffff, 1.5, 100);
-        light.position.set(0, 0, 0);  // Light is at the Sun
-        scene.add(light);
 
         // Set camera position
         camera.position.z = 50;
@@ -81,25 +79,6 @@
         controls.dampingFactor = 0.25;
         controls.enableZoom = true;
 
-        // Update trail for each planet
-        function updateTrail(planetData) {
-            const trailPositions = planetData.trailPositions;
-            const maxTrailPoints = planetData.maxTrailPoints;
-
-            // Get current planet position
-            const planetPosition = new THREE.Vector3();
-            planetData.planet.getWorldPosition(planetPosition);
-
-            // Update trail positions with the latest planet position
-            planetData.trailIndex = (planetData.trailIndex + 1) % maxTrailPoints;
-
-            trailPositions.copyWithin(0, 3);  // Shift older points
-            trailPositions.set([planetPosition.x, planetPosition.y, planetPosition.z], trailPositions.length - 3);
-
-            // Update the geometry
-            planetData.trail.geometry.attributes.position.needsUpdate = true;
-        }
-
         // Animate function to rotate planets around the Sun and update trails
         function animate() {
             requestAnimationFrame(animate);
@@ -107,19 +86,22 @@
             // Rotate each planet around its pivot (orbiting the Sun)
             planets.forEach(planetData => {
                 planetData.pivot.rotation.y += planetData.orbitSpeed;
-                updateTrail(planetData);  // Update the orbit trail for each planet
 
-                // Set planet's position to orbit around the Sun
-                planetData.planet.position.x = planetData.distance * Math.cos(planetData.pivot.rotation.y);
-                planetData.planet.position.z = planetData.distance * Math.sin(planetData.pivot.rotation.y);
-            });
+                // Get current planet position
+                const planetPosition = new THREE.Vector3();
+                planetData.planet.getWorldPosition(planetPosition);
 
-            // Move the Sun through space (very slow drift)
-            sun.position.x += 0.001;
-            sun.position.z += 0.001;
+                // Add current position to trail points
+                planetData.trailPoints.push([planetPosition.x, planetPosition.y, planetPosition.z]);
 
-            // Move all planets and their trails with the Sun
-            planets.forEach(planetData => {
+                // Update trail geometry
+                planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
+
+                // Move the Sun through space (very slow drift)
+                sun.position.x += 0.001;
+                sun.position.z += 0.001;
+
+                // Move all planets and their trails with the Sun
                 planetData.pivot.position.copy(sun.position);  // Keep pivot and planets centered on the Sun
             });
 
