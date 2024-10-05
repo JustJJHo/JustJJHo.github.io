@@ -3,25 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Orrery - Solar System with Textured Sun</title>
+    <title>3D Orrery - Scaled Solar System</title>
     <style>
         body { margin: 0; }
         canvas { display: block; }
-        #controls { position: fixed; top: 10px; left: 10px; z-index: 10; }
     </style>
 </head>
 <body>
-    <div id="controls">
-        <label for="speedControl">Orbit Speed:</label>
-        <input type="range" id="speedControl" min="0.1" max="10" value="1" step="0.1">
-    </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128/examples/js/controls/OrbitControls.js"></script>
     <script>
         // Scene setup
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
@@ -31,13 +25,13 @@
         const sunTexture = new THREE.TextureLoader().load(sunTextureUrl);
 
         // Add a light source for the Sun
-        const light = new THREE.PointLight(0xffffff, 1.5, 100);
+        const light = new THREE.PointLight(0xffffff, 1.5, 1000);
         light.position.set(0, 0, 0);
         scene.add(light);
         scene.add(new THREE.AmbientLight(0x404040)); // Ambient light for softer illumination
 
         // Sun with texture
-        const sunGeometry = new THREE.SphereGeometry(5, 32, 32);
+        const sunGeometry = new THREE.SphereGeometry(0.696, 32, 32); // Sun's diameter scaled
         const sunMaterial = new THREE.MeshPhongMaterial({ map: sunTexture, emissive: 0xffff00 });
         const sun = new THREE.Mesh(sunGeometry, sunMaterial);
         scene.add(sun);
@@ -45,22 +39,7 @@
         // Load textures for the planets
         const loadTexture = (url) => new THREE.TextureLoader().load(url);
 
-        // Function to create text label sprites
-        function createTextLabel(text) {
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            context.font = '24px Arial';
-            context.fillStyle = 'white';
-            context.fillText(text, 0, 24);
-
-            const texture = new THREE.CanvasTexture(canvas);
-            const spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-            const sprite = new THREE.Sprite(spriteMaterial);
-            sprite.scale.set(2, 1, 1);
-            return sprite;
-        }
-
-        // Create a planet function with trails and labels
+        // Create a planet function with scaled size and distance
         function createPlanet(size, textureUrl, distance, orbitSpeed, name) {
             const planetGeometry = new THREE.SphereGeometry(size, 32, 32);
             const planetMaterial = new THREE.MeshStandardMaterial({ map: loadTexture(textureUrl) });
@@ -72,36 +51,23 @@
             pivot.add(planet);
             scene.add(pivot);
 
-            // Add label for the planet
-            const label = createTextLabel(name);
-            label.position.set(distance, 0, size + 1); // Position label slightly above the planet
-            scene.add(label);
-
-            // Orbit trail setup
-            const trailPoints = [];
-            const trailMaterial = new THREE.LineBasicMaterial({ color: planetMaterial.color });
-            const trailGeometry = new THREE.BufferGeometry();
-            trailGeometry.setAttribute('position', new THREE.Float32BufferAttribute(trailPoints.flat(), 3));
-            const trail = new THREE.Line(trailGeometry, trailMaterial);
-            scene.add(trail);
-
-            return { planet, pivot, orbitSpeed, trail, trailPoints, label };
+            return { planet, pivot, orbitSpeed };
         }
 
-        // Create planets and their labels
+        // Create planets with scaled sizes and distances
         const planets = [
-            createPlanet(0.2, 'https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg', 6, 0.04, 'Mercury'),
-            createPlanet(0.4, 'https://upload.wikimedia.org/wikipedia/commons/b/b2/Venus_2_Approach_Image.jpg', 8, 0.02, 'Venus'),
-            createPlanet(0.5, 'https://upload.wikimedia.org/wikipedia/commons/c/cb/The_Blue_Marble_%28remastered%29.jpg', 10, 0.015, 'Earth'),
-            createPlanet(0.4, 'https://upload.wikimedia.org/wikipedia/commons/0/0c/Mars_-_August_30_2021_-_Flickr_-_Kevin_M._Gill.png', 12, 0.012, 'Mars'),
-            createPlanet(0.8, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg', 16, 0.005, 'Jupiter'),
-            createPlanet(0.7, 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg', 20, 0.003, 'Saturn'),
-            createPlanet(0.6, 'https://upload.wikimedia.org/wikipedia/commons/6/69/Uranus_Voyager2_color_calibrated.png', 24, 0.001, 'Uranus'),
-            createPlanet(0.5, 'https://upload.wikimedia.org/wikipedia/commons/b/b9/Neptune_Voyager2_color_calibrated.png', 28, 0.0007, 'Neptune')
+            createPlanet(0.00488, 'https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg', 57.9, 0.04, 'Mercury'),
+            createPlanet(0.01210, 'https://upload.wikimedia.org/wikipedia/commons/b/b2/Venus_2_Approach_Image.jpg', 108.2, 0.02, 'Venus'),
+            createPlanet(0.01274, 'https://upload.wikimedia.org/wikipedia/commons/c/cb/The_Blue_Marble_%28remastered%29.jpg', 149.6, 0.015, 'Earth'),
+            createPlanet(0.00678, 'https://upload.wikimedia.org/wikipedia/commons/0/0c/Mars_-_August_30_2021_-_Flickr_-_Kevin_M._Gill.png', 227.9, 0.012, 'Mars'),
+            createPlanet(0.13982, 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Jupiter.jpg', 778.3, 0.005, 'Jupiter'),
+            createPlanet(0.11646, 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg', 1429, 0.003, 'Saturn'),
+            createPlanet(0.05072, 'https://upload.wikimedia.org/wikipedia/commons/6/69/Uranus_Voyager2_color_calibrated.png', 2871, 0.001, 'Uranus'),
+            createPlanet(0.04924, 'https://upload.wikimedia.org/wikipedia/commons/b/b9/Neptune_Voyager2_color_calibrated.png', 4498, 0.0007, 'Neptune')
         ];
 
         // Set camera position
-        camera.position.set(0, 15, 50);
+        camera.position.set(0, 500, 5000);
 
         // Orbit controls (to allow user to rotate the scene)
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
@@ -109,28 +75,12 @@
         controls.dampingFactor = 0.25;
         controls.enableZoom = true;
 
-        // Speed control
-        const speedControl = document.getElementById('speedControl');
-
-        // Animate function to rotate planets and update labels
+        // Animate function to rotate planets
         function animate() {
             requestAnimationFrame(animate);
 
-            const speedMultiplier = parseFloat(speedControl.value);
-
             planets.forEach(planetData => {
-                planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
-
-                // Update label position to follow the planet
-                const planetPosition = new THREE.Vector3();
-                planetData.planet.getWorldPosition(planetPosition);
-                planetData.label.position.set(planetPosition.x, planetPosition.y + planetData.planet.geometry.parameters.radius + 1, planetPosition.z);
-
-                // Add current position to trail points
-                planetData.trailPoints.push([planetPosition.x, planetPosition.y, planetPosition.z]);
-
-                // Update trail geometry
-                planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
+                planetData.pivot.rotation.y += planetData.orbitSpeed;
             });
 
             controls.update();
