@@ -98,7 +98,7 @@
                 trailPoints,
                 label,
                 timeElapsed: 0,
-                isTrailVisible: true
+                trailOpacity: [] // To store the opacity of each trail point
             };
         }
 
@@ -148,29 +148,32 @@
                 planetData.planet.getWorldPosition(planetPosition);
                 planetData.label.position.set(planetPosition.x, planetPosition.y + planetData.planet.geometry.parameters.radius + 1, planetPosition.z);
 
-                // Update trail points and manage visibility
-                if (planetData.isTrailVisible) {
-                    planetData.timeElapsed += 1 / 60; // Increment time (60 FPS)
-                    planetData.trailPoints.push([planetPosition.x, planetPosition.y, planetPosition.z]);
+                // Update trail points and opacity
+                planetData.timeElapsed += 1 / 60; // Increment time (60 FPS)
+                planetData.trailPoints.push([planetPosition.x, planetPosition.y, planetPosition.z]);
+                planetData.trailOpacity.push(1); // Start with full opacity
 
-                    // Update trail geometry
-                    planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
+                // Update trail geometry
+                planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
 
-                    // Remove oldest point from trail if it exceeds 10 seconds of trail length
-                    if (planetData.trailPoints.length > 60 * 10) { // 60 FPS * 10 seconds
-                        planetData.trailPoints.shift(); // Remove the oldest point
-                    }
+                // Fade out the oldest trail point
+                if (planetData.trailPoints.length > 60 * 10) { // 60 FPS * 10 seconds
+                    planetData.trailPoints.shift(); // Remove the oldest point
+                    planetData.trailOpacity.shift(); // Remove the corresponding opacity value
+                }
 
-                    // Hide trail after 10 seconds
-                    if (planetData.timeElapsed > 10) {
-                        planetData.isTrailVisible = false;
-                        planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3)); // Clear trail
-                    }
-                } else {
-                    // Reset trail after it disappears
-                    planetData.trailPoints.length = 0; // Clear points
-                    planetData.isTrailVisible = true; // Re-enable trail visibility
-                    planetData.timeElapsed = 0; // Reset time elapsed
+                // Manage the opacity for fading effect
+                for (let i = 0; i < planetData.trailOpacity.length; i++) {
+                    planetData.trailOpacity[i] = Math.max(0, planetData.trailOpacity[i] - 0.01); // Fade out over time
+                }
+
+                // Update the trail material color with the opacity
+                const positions = planetData.trail.geometry.attributes.position.array;
+                for (let i = 0; i < planetData.trailPoints.length; i++) {
+                    // Set the color and alpha value for the fading effect
+                    trailMaterial.color.set(planetMaterial.color);
+                    trailMaterial.transparent = true;
+                    trailMaterial.opacity = planetData.trailOpacity[i]; // Set the opacity
                 }
             });
 
