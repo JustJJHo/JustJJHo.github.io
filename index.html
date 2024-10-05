@@ -126,7 +126,7 @@
 
             const speedMultiplier = parseFloat(speedControl.value);
 
-            // Move the Sun upwards gradually
+            // Move the Sun and planets upwards gradually
             upwardMovement += 0.01; // Adjust speed of upward movement if necessary
             sun.position.y = upwardMovement;
             light.position.y = upwardMovement;
@@ -134,6 +134,12 @@
             planets.forEach(planetData => {
                 // Rotate the planet's pivot to create orbiting
                 planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
+
+                // Update the planet's position to orbit around the Sun
+                const angle = planetData.pivot.rotation.y;
+                planetData.planet.position.x = Math.cos(angle) * planetData.pivot.position.x; // Orbit in the X direction
+                planetData.planet.position.z = Math.sin(angle) * planetData.pivot.position.x; // Orbit in the Z direction
+                planetData.planet.position.y = upwardMovement; // Move upwards with the Sun
 
                 // Update label position to follow the planet
                 const planetPosition = new THREE.Vector3();
