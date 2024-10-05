@@ -112,14 +112,13 @@
         const controls = new THREE.OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.25;
-        controls.enableZoom = true;
-
-        // Disable right-click for OrbitControls
+        controls.enableZoom = false; // Disable zooming
         controls.enablePan = false; // Disable panning
-        controls.enableRotate = true; // Allow rotation
+
+        // Lock camera rotation around the sun
         controls.mouseButtons = {
             LEFT: THREE.MOUSE.ROTATE,
-            MIDDLE: THREE.MOUSE.DOLLY,
+            MIDDLE: null, // Disable middle mouse button interaction
             RIGHT: null // Disable right-click
         };
 
@@ -159,7 +158,6 @@
             // Check if trails should disappear
             planets.forEach(planetData => {
                 if (planetData.trailPoints.length > 0) {
-                    const startTime = performance.now();
                     setTimeout(() => {
                         planetData.trailPoints.length = 0; // Clear trail points
                         planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute([], 3)); // Clear geometry
