@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Orrery</title>
+    <title>3D Orrery with Orbit Lines</title>
     <style>
         body { margin: 0; }
         canvas { display: block; }
@@ -26,6 +26,15 @@
         const sun = new THREE.Mesh(sunGeometry, sunMaterial);
         scene.add(sun);
 
+        // Create an orbit line function
+        function createOrbit(distance) {
+            const orbitGeometry = new THREE.RingGeometry(distance - 0.05, distance + 0.05, 64);
+            const orbitMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+            const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
+            orbit.rotation.x = Math.PI / 2;  // Align the ring to lay flat (horizontal)
+            scene.add(orbit);
+        }
+
         // Create a planet function
         function createPlanet(size, color, distance) {
             const planetGeometry = new THREE.SphereGeometry(size, 32, 32);
@@ -38,6 +47,9 @@
             planet.position.set(distance, 0, 0);
             pivot.add(planet);
             scene.add(pivot);
+
+            // Add orbit line
+            createOrbit(distance);
 
             return { planet, pivot };
         }
