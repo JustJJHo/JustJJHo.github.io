@@ -114,21 +114,16 @@
         ];
 
         // Set initial camera position
-        camera.position.set(0, 15, 50); // Adjust height and distance from the sun
+        camera.position.set(100, 100, 100); // Initial distance from the sun
 
-        // Orbit controls (to allow user to rotate and tilt the scene)
-        const controls = new THREE.OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.dampingFactor = 0.25;
-        controls.enableZoom = true;
-        controls.enableRotate = true; // Allow rotation
-        controls.screenSpacePanning = false; // Prevent panning in the screen space
+        // Zoom factor for smooth zoom in/out
+        let zoomFactor = 1;
+        window.addEventListener('wheel', (event) => {
+            zoomFactor += event.deltaY * 0.001;  // Adjust zoom speed
+            zoomFactor = Math.max(0.5, Math.min(zoomFactor, 5));  // Limit zoom levels
+        });
 
-        // Lock the target of controls to the Sun
-        controls.target.set(0, 0, 0); // Position of the Sun
-        controls.update(); // Update the controls to apply the new target
-
-        // Animate function to rotate planets and update labels
+        // Animate function to rotate planets, update labels, and control camera
         function animate() {
             requestAnimationFrame(animate);
 
@@ -161,7 +156,15 @@
                 planetData.trail.geometry.attributes.position.needsUpdate = true; // Mark for update
             });
 
-            controls.update(); // Required for damping
+            // Camera to sun position (always look at the sun)
+            const direction = new THREE.Vector3().subVectors(sun.position, camera.position).normalize();
+            camera.position.set(
+                sun.position.x - direction.x * 100 * zoomFactor,
+                sun.position.y - direction.y * 100 * zoomFactor,
+                sun.position.z - direction.z * 100 * zoomFactor
+            );
+            camera.lookAt(sun.position); // Always look at the Sun
+
             renderer.render(scene, camera);
         }
 
