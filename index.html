@@ -114,16 +114,21 @@
         ];
 
         // Set initial camera position
-        camera.position.set(100, 100, 100); // Initial distance from the sun
+        camera.position.set(0, 15, 50); // Adjust height and distance from the sun
 
-        // Zoom factor for smooth zoom in/out
-        let zoomFactor = 1;
-        window.addEventListener('wheel', (event) => {
-            zoomFactor += event.deltaY * 0.001;  // Adjust zoom speed
-            zoomFactor = Math.max(0.5, Math.min(zoomFactor, 5));  // Limit zoom levels
-        });
+        // Orbit controls (to allow user to rotate and tilt the scene)
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.25;
+        controls.enableZoom = true;
+        controls.enableRotate = true; // Allow rotation
+        controls.screenSpacePanning = false; // Prevent panning in the screen space
 
-        // Animate function to rotate planets, update labels, and control camera
+        // Lock the target of controls to the Sun initially
+        controls.target.set(0, 0, 0); // Position of the Sun
+        controls.update(); // Update the controls to apply the new target
+
+        // Animate function to rotate planets and update labels
         function animate() {
             requestAnimationFrame(animate);
 
@@ -132,9 +137,13 @@
             // Move the sun upwards and make speed adjustable
             sun.position.y += 0.01 * speedMultiplier; // Change the speed of the upward movement here
 
+            // Update controls target to follow the Sun's position
+            controls.target.set(sun.position.x, sun.position.y, sun.position.z);
+            controls.update();
+
             planets.forEach(planetData => {
-                // Move the pivot upwards
-                planetData.pivot.position.y = sun.position.y; // Keep the pivot moving upwards
+                // Move the pivot upwards with the sun
+                planetData.pivot.position.y = sun.position.y;
 
                 planetData.pivot.rotation.y += planetData.orbitSpeed * speedMultiplier;
 
@@ -155,15 +164,6 @@
                 planetData.trail.geometry.setAttribute('position', new THREE.Float32BufferAttribute(planetData.trailPoints.flat(), 3));
                 planetData.trail.geometry.attributes.position.needsUpdate = true; // Mark for update
             });
-
-            // Camera to sun position (always look at the sun)
-            const direction = new THREE.Vector3().subVectors(sun.position, camera.position).normalize();
-            camera.position.set(
-                sun.position.x - direction.x * 100 * zoomFactor,
-                sun.position.y - direction.y * 100 * zoomFactor,
-                sun.position.z - direction.z * 100 * zoomFactor
-            );
-            camera.lookAt(sun.position); // Always look at the Sun
 
             renderer.render(scene, camera);
         }
